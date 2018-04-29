@@ -1,6 +1,7 @@
 
 view = {};
 view.main = document.querySelector('.main');
+view.angle = 0;
 
 function setup(modValue, x, y) {
   const mod = modValue;
@@ -9,7 +10,7 @@ function setup(modValue, x, y) {
   const entryX = x/2;
   const entryY = 0;
   return {
-    mod: 10,
+    mod: mod,
     entryX: entryX,
     entryY: entryY,
     width: width,
@@ -33,18 +34,18 @@ function Module([posX, posY]) {
   this.posX = posX * this.mod;
   this.posY = posY * this.mod;
   this.color;
-  this.ctx = view.canvas.getContext('2d');
+  ctx = view.canvas.getContext('2d');
   // this.ctx.fillStyle = this.color;
 }
 
 Module.prototype.clear = function() {
-  this.ctx.clearRect(this.posX, this.posY, this.mod, this.mod);
+  ctx.clearRect(this.posX, this.posY, this.mod, this.mod);
 };
 Module.prototype.place = function() {  
-  this.ctx.fillRect(this.posX, this.posY, this.mod, this.mod);
+  ctx.fillRect(this.posX, this.posY, this.mod, this.mod);
 };
 Module.prototype.setColor = function(color) {  
-  this.ctx.fillStyle = color;
+  ctx.fillStyle = color;
 };
 Module.prototype.moveRight = function() {
   this.clear();  
@@ -78,6 +79,7 @@ function Square_Shape(){
   this._2 = [this.entryX, this.entryY];
   this._3 = [this.entryX-1, this.entryY+1];
   this._4 = [this.entryX, this.entryY+1]; 
+
 }
 
 function I_Shape(){
@@ -92,43 +94,67 @@ Square_Shape.prototype = new Shape();
 function Shape() {
   this.entryX = config.entryX;
   this.entryY = config.entryY;
-  this._1;
-  this._2;
-  this._3;
-  this._4;
 }
-Shape.prototype.create = function(color) {
-  this.color = color;
+Shape.prototype.getPivot = function() {
+  return [this.shape[2].posX, this.shape[2].posY + config.mod];
+}
+Shape.prototype.create = function() {  
   this.shape = [
     new Module(this._4), new Module(this._3), new Module(this._2), new Module(this._1)
   ];
 }
-Shape.prototype.setColor = function() {
+Shape.prototype.paint = function(color) {
+ this.color = color;
  this.shape.forEach( (square) => {square.setColor(this.color)} );
 }
-Shape.prototype.modify = function() {
-  this.setColor();
-  this.copy = this.shape.slice();  
-  this.place = function() {this.shape.forEach( (square) => {square.place()} )}.bind(this);
-  this.moveLeft = function() {this.copy.reverse().forEach( (square) => {square.moveLeft()} )}.bind(this);
-  this.moveRight = function() {this.shape.forEach( (square) => {square.moveRight()} )}.bind(this);
-  this.moveDown = function() {this.shape.forEach( (square) => {square.moveDown()} )}.bind(this)
+Shape.prototype.place = function() {
+ this.shape.forEach( (square) => {square.place()});
+}
+Shape.prototype.rotate = function(angle) {
+  view.angle = view.angle + angle;
+  let centreX = this.getPivot()[0];
+  let centreY = this.getPivot()[1]
+  this.shape.forEach( (square) => {square.clear()} )
+  ctx.translate(centreX, centreY);
+  ctx.rotate(angle * Math.PI / 180);
+  this.shape.forEach( (square) => {
+    square.posX = square.posX-centreX;
+    square.posY = square.posY-centreY;
+    square.place();      
+  });
+  console.log(view.angle)
+}
+Shape.prototype.move = function() {
+  this.paint(this.color);
+  this.copy = this.shape.slice();
+  ctx.rotate(-view.angle * Math.PI / 180);
+  view.angle = 0;
+  this.left = function() {this.copy.reverse().forEach( (square) => {square.moveLeft()} )}.bind(this);
+  this.right = function() {this.shape.forEach( (square) => {square.moveRight()} )}.bind(this);
+  this.down = function() {this.shape.forEach( (square) => {square.moveDown()} )}.bind(this)
   return {
-    place: this.place,
-    moveLeft: this.moveLeft,
-    moveRight: this.moveRight,
-    moveDown: this.moveDown,
+    left: this.left,
+    right: this.right,
+    down: this.down,
   }
 }
+Shape.prototype.drawLineOnCanvas = function() {
+  this.mod = config.mod;
+  this.startMiddleAxisX = this.entryX*this.mod;
+  this.startMiddleAxisY = this.entryY*this.mod;
+  this.endMiddleAxisX = this.entryX*this.mod;
+  this.endMiddleAxisY = this.entryY*this.mod + config.height;
+  ctx.beginPath();
+  ctx.moveTo(this.startMiddleAxisX, this.startMiddleAxisY);
+  ctx.lineTo(this.endMiddleAxisX, this.endMiddleAxisY);
+  ctx.stroke();
+}
 
-const line = new I_Shape();
-line.create('#6d92c4');
-line.modify().place();
-
-const activeShape = new Square_Shape();
-activeShape.create('pink');
-activeShape.modify().place();
-console.log(activeShape)
+const activeShape = new I_Shape();
+activeShape.create();
+activeShape.paint('pink');
+activeShape.place();
+activeShape.drawLineOnCanvas();
 
 const square2 = new Module([3, 3]);
 square2.setColor('black');
@@ -139,12 +165,12 @@ view.activeItem = activeShape;
 const keydownHandler = function() {
   const activeItem = view.activeItem;
   const listenedKeys = {
-    b: (function() { activeItem.modify().moveDown() }),
-    Enter: (function() { activeItem.moveDown() }), // !!! omits setColor() and takes the function as private variable
-    ArrowRight: (function() { activeItem.modify().moveRight() }),
-    ArrowLeft: (function() { activeItem.modify().moveLeft() }),
-    ArrowDown: (function() { activeItem.rotateCounterClockwise() }),
-    ArrowUp: (function() { activeItem.rotateClockwise() }),    
+    b: (function() { activeItem.move().down() }),
+    Enter: (function() { activeItem.down() }), // !!! omits setColor() and takes the function as private variable
+    ArrowRight: (function() { activeItem.move().right() }),
+    ArrowLeft: (function() { activeItem.move().left() }),
+    ArrowDown: (function() { activeItem.rotate(-90) }),
+    ArrowUp: (function() { activeItem.rotate(90) }),    
   }
   Object.keys(listenedKeys).forEach((name) => {if(event.key === name) { listenedKeys[name]() } });
   console.log(event.key)
