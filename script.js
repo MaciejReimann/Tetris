@@ -28,14 +28,13 @@ function createCanvas(width, height, parent, className) {
   return canvas;
 }
 view.canvas = createCanvas(config.width, config.height, view.main, 'canvas');
+const ctx = view.canvas.getContext('2d');
 
 function Module([posX, posY]) {
   this.mod = config.mod;
   this.posX = posX * this.mod;
   this.posY = posY * this.mod;
-  this.color;
-  ctx = view.canvas.getContext('2d');
-  // this.ctx.fillStyle = this.color;
+  this.color;  
 }
 
 Module.prototype.clear = function() {
@@ -60,6 +59,11 @@ Module.prototype.moveLeft = function() {
 Module.prototype.moveDown = function() {
   this.clear();  
   this.posY = this.posY + this.mod;
+  this.place();
+};
+Module.prototype.moveUp = function() {
+  this.clear();  
+  this.posY = this.posY - this.mod;
   this.place();
 };
 Module.prototype.rotateCounterClockwise = function() {
@@ -112,6 +116,7 @@ Shape.prototype.place = function() {
 }
 Shape.prototype.rotate = function(angle) {
   view.angle = view.angle + angle;
+  updateCoordinates();
   let centreX = this.getPivot()[0];
   let centreY = this.getPivot()[1]
   this.shape.forEach( (square) => {square.clear()} )
@@ -126,18 +131,25 @@ Shape.prototype.rotate = function(angle) {
 }
 Shape.prototype.move = function() {
   this.paint(this.color);
+  this.place();
   this.copy = this.shape.slice();
-  ctx.rotate(-view.angle * Math.PI / 180);
-  view.angle = 0;
+  // ctx.rotate(-view.angle * Math.PI / 180);
+  // view.angle = 0;
+  
   this.left = function() {this.copy.reverse().forEach( (square) => {square.moveLeft()} )}.bind(this);
   this.right = function() {this.shape.forEach( (square) => {square.moveRight()} )}.bind(this);
   this.down = function() {this.shape.forEach( (square) => {square.moveDown()} )}.bind(this)
+  this.up = function() {this.shape.forEach( (square) => {square.moveUp()} )}.bind(this)
   return {
     left: this.left,
     right: this.right,
     down: this.down,
+    up: this.up
   }
 }
+
+
+
 Shape.prototype.drawLineOnCanvas = function() {
   this.mod = config.mod;
   this.startMiddleAxisX = this.entryX*this.mod;
@@ -156,6 +168,29 @@ activeShape.paint('pink');
 activeShape.place();
 activeShape.drawLineOnCanvas();
 
+const up =  activeShape.move().up;
+const right = activeShape.move().right;
+const down = activeShape.move().down;
+const left = activeShape.move().left;
+let accordingToShape = [up, right, down, left];
+function updateCoordinates(){
+  let angle = view.angle%360;
+  console.log(angle)
+  if(angle===90 || angle === -270) {
+    accordingToShape = [left, up, right, down];
+  } else if(angle===180 || angle===-180) {
+    accordingToShape = [down, left, up, right];
+  } else if (angle===270 || angle===-90) {
+    accordingToShape = [right, down, left, up];
+  } else {
+    accordingToShape = [up, right, down, left]
+  }
+}
+function moveRight() {accordingToShape[1]()};
+function moveDown() {accordingToShape[2]()};
+function moveLeft() {accordingToShape[3]()}
+
+
 const square2 = new Module([3, 3]);
 square2.setColor('black');
 square2.place();
@@ -165,12 +200,11 @@ view.activeItem = activeShape;
 const keydownHandler = function() {
   const activeItem = view.activeItem;
   const listenedKeys = {
-    b: (function() { activeItem.move().down() }),
-    Enter: (function() { activeItem.down() }), // !!! omits setColor() and takes the function as private variable
-    ArrowRight: (function() { activeItem.move().right() }),
-    ArrowLeft: (function() { activeItem.move().left() }),
-    ArrowDown: (function() { activeItem.rotate(-90) }),
-    ArrowUp: (function() { activeItem.rotate(90) }),    
+    ArrowDown: (function() { moveDown() }),
+    ArrowRight: (function() { moveRight() }),
+    ArrowLeft: (function() {  moveLeft() }),
+    z: (function() { activeItem.rotate(-90) }),
+    a: (function() { activeItem.rotate(90) }),
   }
   Object.keys(listenedKeys).forEach((name) => {if(event.key === name) { listenedKeys[name]() } });
   console.log(event.key)
