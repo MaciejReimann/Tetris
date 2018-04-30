@@ -72,13 +72,15 @@ function Square_Shape(){
   this._1 = [this.entryX-1, this.entryY];
   this._2 = [this.entryX, this.entryY];
   this._3 = [this.entryX-1, this.entryY+1];
-  this._4 = [this.entryX, this.entryY+1]; 
+  this._4 = [this.entryX, this.entryY+1];
+  this.pivotPoint = {x: , y:};
 }
 function I_Shape(){
   this._1 = [this.entryX-2, this.entryY];
   this._2 = [this.entryX-1, this.entryY];
   this._3 = [this.entryX, this.entryY];
-  this._4 = [this.entryX+1, this.entryY]; 
+  this._4 = [this.entryX+1, this.entryY];
+  this.pivotPoint = {x: , y:};
 }
 I_Shape.prototype = new Shape();
 Square_Shape.prototype = new Shape();
@@ -106,8 +108,8 @@ Shape.prototype.rotate = function(angle) {
   this.paint(this.color);
   view.angle = view.angle + angle;
   updateCoordinates();
-  let centreX = this.getPivot()[0];
-  let centreY = this.getPivot()[1]
+  let centreX = this.pivotPoint.x;
+  let centreY = this.pivotPoint.y;
   this.shape.forEach( (square) => {square.clear()} )
   ctx.translate(centreX, centreY);
   ctx.rotate(angle * Math.PI / 180);
@@ -123,6 +125,7 @@ Shape.prototype.move = function() {
   this.right = function() {this.shape.forEach( (square) => {square.moveRight()} )}.bind(this);
   this.down = function() {this.shape.forEach( (square) => {square.moveDown()} )}.bind(this);
   this.up = function() {this.shape.forEach( (square) => {square.moveUp()} )}.bind(this);
+  checkIfHitTheBottom();
   return {
     left: this.left,
     right: this.right,
@@ -142,6 +145,14 @@ Shape.prototype.drawLineOnCanvas = function() {
   ctx.lineTo(this.endMiddleAxisX, this.endMiddleAxisY);
   ctx.stroke();
 }
+
+function checkIfHitTheBottom() {
+  checkIfFullLine()
+}
+function checkIfFullLine() {
+  return true;
+}
+
 
 const activeShape = new I_Shape();
 
