@@ -67,20 +67,46 @@ Module.prototype.moveUp = function() {
   this.place();
 };
 
+function L_Shape(x,y) {
+  this.mod = config.mod;
+  this.pivot = {
+    x: x, 
+    y: y
+  };
+  this._1 = {
+    x: this.pivot.x - this.mod * 1.5,
+    y: this.pivot.y - this.mod
+  };
+  this._2 = {
+    x: this.pivot.x - this.mod * 1.5,
+    y: this.pivot.y
+  };
+  this._3 = {
+    x: this.pivot.x - this.mod * 0.5,
+    y: this.pivot.y
+  };
+  this._4 = {
+    x: this.pivot.x + this.mod * 0.5,
+    y: this.pivot.y
+  };
+}
+
+const lShape = new L_Shape(config.entryX, config.entryY)
+
 
 function Square_Shape(){
   this._1 = [this.entryX-1, this.entryY];
   this._2 = [this.entryX, this.entryY];
   this._3 = [this.entryX-1, this.entryY+1];
   this._4 = [this.entryX, this.entryY+1];
-  this.pivotPoint = {x: , y:};
+  // this.pivotPoint = {x: , y:};
 }
 function I_Shape(){
   this._1 = [this.entryX-2, this.entryY];
   this._2 = [this.entryX-1, this.entryY];
   this._3 = [this.entryX, this.entryY];
   this._4 = [this.entryX+1, this.entryY];
-  this.pivotPoint = {x: , y:};
+  // this.pivotPoint = {x: , y:};
 }
 I_Shape.prototype = new Shape();
 Square_Shape.prototype = new Shape();
