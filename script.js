@@ -49,6 +49,112 @@ Square.prototype.draw = function(color) {
   ctx.fillStyle = color;
 };
 
+// ------------------------------
+// --- POSSIBLE TETRIS SHAPES ---
+function Z_ShapeLeft(x,y) {
+  Tetris.call(this, x, y);
+  this.getAnchorPoints = function () {
+    let anchorPoints = [
+      {
+        x: this.pivot.x - this.mod*2,
+        y: this.pivot.y - this.mod
+      },
+      {
+        x: this.pivot.x - this.mod,
+        y: this.pivot.y - this.mod
+      },
+      {
+        x: this.pivot.x - this.mod,
+        y: this.pivot.y
+      },
+      {
+        x: this.pivot.x,
+        y: this.pivot.y
+      },
+    ];
+  return anchorPoints;
+  }
+}
+Z_ShapeLeft.prototype = Object.create(Tetris.prototype);
+
+function Z_ShapeRight(x,y) {
+  Tetris.call(this, x, y);
+  this.getAnchorPoints = function () {
+    let anchorPoints = [
+      {
+        x: this.pivot.x - this.mod*2,
+        y: this.pivot.y
+      },
+      {
+        x: this.pivot.x - this.mod,
+        y: this.pivot.y
+      },
+      {
+        x: this.pivot.x - this.mod,
+        y: this.pivot.y - this.mod
+      },
+      {
+        x: this.pivot.x,
+        y: this.pivot.y - this.mod
+      },
+    ];
+  return anchorPoints;
+  }
+}
+Z_ShapeRight.prototype = Object.create(Tetris.prototype);
+
+function BigSquare(x,y) {
+  Tetris.call(this, x, y);
+  this.getAnchorPoints = function () {
+    let anchorPoints = [
+      {
+        x: this.pivot.x - this.mod,
+        y: this.pivot.y - this.mod
+      },
+      {
+        x: this.pivot.x - this.mod,
+        y: this.pivot.y
+      },
+      {
+        x: this.pivot.x,
+        y: this.pivot.y - this.mod
+      },
+      {
+        x: this.pivot.x,
+        y: this.pivot.y
+      },
+    ];
+  return anchorPoints;
+  }
+}
+BigSquare.prototype = Object.create(Tetris.prototype);
+
+function I_Shape(x,y) {
+  Tetris.call(this, x, y);
+  this.getAnchorPoints = function () {
+    let anchorPoints = [
+      {
+        x: this.pivot.x - this.mod*2,
+        y: this.pivot.y
+      },
+      {
+        x: this.pivot.x - this.mod,
+        y: this.pivot.y
+      },
+      {
+        x: this.pivot.x,
+        y: this.pivot.y
+      },
+      {
+        x: this.pivot.x + this.mod,
+        y: this.pivot.y
+      },
+    ];
+  return anchorPoints;
+  }
+}
+I_Shape.prototype = Object.create(Tetris.prototype);
+
 function L_ShapeLeft(x,y) {
   Tetris.call(this, x, y);
   this.getAnchorPoints = function () {
@@ -183,7 +289,7 @@ const activeShape = {
   rotate: function(angle) {this.instance.rotate(angle)}
 };
 
-activeShape.set(new L_ShapeRight(config.entryX, config.entryY));
+activeShape.set(new Z_ShapeRight(config.entryX, config.entryY));
 
 
 const keydownHandler = function() {
