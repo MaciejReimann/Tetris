@@ -225,33 +225,18 @@ const activeShape = {
     this.instance.drawFilled()
     view.tetrisFalling = this.instance;
   },
-  move: function() {
+  move: function() {  
     let tetris = this.instance;
-    let rotation = this.rotation;
-    const up = function() {tetris.moveUp()};
-    const right = function() {tetris.moveRight()};
-    const down = function() {tetris.moveDown()};
-    const left = function() {tetris.moveLeft()};
-    let angle = view.angle%360;
-    if(angle===90 || angle === -270) {
-      rotation = [left, up, right, down];
-    } else if(angle===180 || angle===-180) {
-      rotation = [down, left, up, right];
-    } else if (angle===270 || angle===-90) {
-      rotation = [right, down, left, up];
-    } else {
-      rotation = [up, right, down, left]
-    }
     return {
-      right: function() {rotation[1]()},
-      down: function() {rotation[2]()},
-      left: function() {rotation[3]()}
+      right: function() {tetris.moveRight()},
+      down: function() {tetris.moveDown()},
+      left: function() {tetris.moveLeft()}
     }
   },
   rotate: function(angle) {this.instance.rotate(angle)}
 };
 
-activeShape.welcome(new S_Tetris(config.entryX, config.entryY));
+activeShape.welcome(new L_TetrisMirrored(config.entryX, config.entryY));
 
 
 
