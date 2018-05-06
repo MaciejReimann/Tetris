@@ -35,21 +35,6 @@ function clearCanvas() {
   ctx.clearRect(0, 0, config.width, config.height);
 }
 
-
-// function Square(x,y) {
-//   this.mod = config.mod;
-//   this.anchorPoint = {
-//     x: x,
-//     y: y
-//   }
-// }
-// Square.prototype.draw = function(color) {
-//   this.color = color;
-//   ctx.fillRect(this.anchorPoint.x, this.anchorPoint.y, this.mod, this.mod);
-//   ctx.fillStyle = color;
-// };
-
-
 // -------------------------------------------
 // --- POSSIBLE TETRIS SHAPES CONSTRUCTORS ---
 
@@ -63,6 +48,36 @@ function mirrorVertices(verticesArray) {
   })
   return mirrored;
 }
+
+function translateToCartesian(polarVerticesArray) {
+  let cartesianVertices = [];
+  polarVerticesArray.forEach((vertex) => {
+    let n = 0
+   let x = vertex[0] * Math.cos( (vertex[1] - n) * (Math.PI / 180) ) // x = r * cos(angle - in radians)
+   let y = vertex[0] * Math.sin( (vertex[1] - n) * (Math.PI / 180) ) // y = r * sin(angle - in radians)
+    cartesianVertices.push([x, y]);
+  })
+  return cartesianVertices;
+}
+
+function translateToPolar(verticesArray) {
+  let polarVertices = [];
+  verticesArray.forEach((vertex) => {
+    let r = Math.sqrt(vertex[0] * vertex[0] + vertex[1] * vertex[1]);
+    let angle = Math.atan2(vertex[1], vertex[0]) * (180 / Math.PI);
+    polarVertices.push([r, angle]);
+  })
+  return polarVertices;
+}
+function rotatePolar(polarVerticesArray, angle) {
+  let rotated = [];
+  polarVerticesArray.forEach((vertex) => {
+    vertex[1] = vertex[1] + angle;
+    rotated.push([vertex[0], vertex[1]]);
+  })
+  return rotated;
+}
+
 
 function S_Tetris(x,y) {
   Tetris.call(this, x, y);
@@ -101,7 +116,7 @@ function I_Tetris(x,y) {
 I_Tetris.prototype = Object.create(Tetris.prototype);
 
 // -------------------------------------------
-// ------ TETRIS DEFINITION & BEHAVIOR -------
+// ----- TETRIS DEFINITION & RENDERING -------
 
 function Tetris(x,y) {
   this.mod = config.mod;
@@ -109,6 +124,7 @@ function Tetris(x,y) {
     x: x, 
     y: y
   }
+  this.angle = 0;
 }
 Tetris.prototype.getGlobalVertices = function() {
   let globalVertices = []
@@ -116,6 +132,9 @@ Tetris.prototype.getGlobalVertices = function() {
     globalVertices.push(translateVerticesToGlobal(this.pivot, this.mod, vertex[0], vertex[1]));
   }.bind(this) );
   return globalVertices;
+}
+Tetris.prototype.getPolarVertices = function() {
+  return translateToPolar(this.vertices);
 }
 Tetris.prototype.drawOutline = function() {
   clearCanvas();
@@ -141,6 +160,8 @@ Tetris.prototype.drawFilled = function() {
   ctx.fill();
 }
 
+// -------------------------------------------
+// ------------- TETRIS BEHAVIOR -------------
 
 Tetris.prototype.moveUp = function() {
   this.pivot.y = this.pivot.y - this.mod;
@@ -159,30 +180,25 @@ Tetris.prototype.moveLeft = function() {
   this.drawFilled();
 }
 Tetris.prototype.rotate = function(angle) {
-  view.angle = view.angle + angle;
-  let centreX = this.pivot.x;
-  let centreY = this.pivot.y;
-  
-  ctx.translate(centreX, centreY);
-  ctx.rotate(angle * Math.PI / 180);
-  ctx.translate(-centreX, -centreY);
-  console.log(this.pivot.x, this.pivot.y)
-
+  this.angle += angle;
+  let rotated = rotatePolar(this.getPolarVertices(), this.angle);
+  this.vertices = translateToCartesian(rotated);
+  this.angle = 0;
   this.drawFilled();
 }
 
 function checkIfHitTheBottom(tetris) {
-  (function drawGrid() {
-    const width = config.width;
-    const height = config.height;
-    const mod = config.mod
-    for (let i = 0; i < width; i ++) {
-      ctx.beginPath();
-      ctx.moveTo(0, i * config.mod);
-      ctx.lineTo(width, i * config.mod);
-      ctx.stroke();
-    }    
-  })()
+  // (function drawGrid() {
+  //   const width = config.width;
+  //   const height = config.height;
+  //   const mod = config.mod
+  //   for (let i = 0; i < width; i ++) {
+  //     ctx.beginPath();
+  //     ctx.moveTo(0, i * config.mod);
+  //     ctx.lineTo(width, i * config.mod);
+  //     ctx.stroke();
+  //   }    
+  // })()
   // (function drawBottomLine() {
   //   ctx.beginPath();
   //   ctx.moveTo(0, config.height-10);
@@ -235,26 +251,31 @@ const activeShape = {
   rotate: function(angle) {this.instance.rotate(angle)}
 };
 
-activeShape.welcome(new S_Tetris(config.entryX+100, config.entryY+100));
+activeShape.welcome(new S_Tetris(config.entryX, config.entryY));
 
 
 
 
-let g = new S_TetrisMirrored(200, 200)
-let l = new L_Tetris(300, 400);
-l.drawFilled();
+// let g = new S_TetrisMirrored(200, 200)
+// let l = new L_Tetris(300, 400);
+// l.drawFilled();
 
-let lm = new L_TetrisMirrored(100, 400);
-lm.drawFilled()
+// let lm = new L_TetrisMirrored(100, 400);
+// lm.drawFilled()
 
-let sq = new SquareTetris(50, 50);
-sq.drawFilled()
+// let sq = new SquareTetris(50, 50);
+// sq.drawFilled()
 
-let i = new I_Tetris(150, 50);
-i.drawFilled()
+// let i = new I_Tetris(150, 50);
+// i.drawFilled()
+
+
+
+
+// -------------------------------------------
+// ------------- USER INTERFACE --------------
 
 const keydownHandler = function() {
-  const activeItem = activeShape.instance;
   const listenedKeys = {
     ArrowDown: activeShape.move().down,
     ArrowRight: activeShape.move().right,
@@ -263,7 +284,7 @@ const keydownHandler = function() {
     a: (function() { activeShape.rotate(90) }),
   }
   Object.keys(listenedKeys).forEach((name) => {if(event.key === name) { listenedKeys[name]() } });
-  checkIfHitTheBottom(activeItem)
+  checkIfHitTheBottom()
 }
 
 window.addEventListener('keydown', keydownHandler);
