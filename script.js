@@ -4,18 +4,20 @@ view.main = document.querySelector('.main');
 view.angle = 0;
 view.tetrisFalling;
 
+
 function setup(modValue, x, y) {
   const mod = modValue;
   const width = x*mod;
   const height = y*mod;
-  const entryX = x/2*modValue;
+  const entryX = x/2*modValue + modValue/2;
   const entryY = 0;
   return {
     mod: mod,
     entryX: entryX,
     entryY: entryY,
     width: width,
-    height: height
+    height: height,
+    bottom: generateBottomVertices(width, height, mod)
   }
 }
 config = setup(10, 40, 50);
@@ -33,6 +35,14 @@ const ctx = view.canvas.getContext('2d');
 
 function clearCanvas() {
   ctx.clearRect(0, 0, config.width, config.height);
+}
+function generateBottomVertices(width, height, mod) {
+  const bottomVertices = [];
+  const y = height
+  for (let x = 0; x < width; x += mod) {
+    bottomVertices.push([x, y])
+  }
+  return bottomVertices;
 }
 
 // -------------------------------------------
@@ -216,6 +226,14 @@ function checkIfFullLine() {
   return true;
 }
 
+const game = {};
+game.bottom = {};
+game.bottom.array = config.bottom;
+game.bottom.getY = function(x) {
+  if (x) {
+    return this.array.find(function(vertex) { return vertex[0] === x }) [1];
+  }
+}
 
 const activeShape = {
   instance:{},
@@ -233,7 +251,31 @@ const activeShape = {
       left: function() {tetris.moveLeft()}
     }
   },
-  rotate: function(angle) {this.instance.rotate(angle)}
+  rotate: function(angle) {this.instance.rotate(angle)},
+  updateBottom: function() {
+    return game.bottom.array;
+  },
+  checkIfTouchesBottom: function() {
+      // const bottom = this.updateBottom();
+      const tetris = this.instance;
+      const vertices = tetris.getGlobalVertices();
+      const verticesTouchingBottom = vertices.filter((vertex) => {
+        if (vertex[1] === game.bottom.getY(vertex[0] )) {
+          return true;
+        } else {return false}      
+      })
+      if (verticesTouchingBottom.length > 1) {
+        return true;
+      } else {
+        return false
+      }
+  },
+
+  checkPositionRelativeToBottom: function() {
+    if (this.checkIfTouchesBottom()) {
+      this.welcome(new SquareTetris(config.entryX-5, config.entryY-5))
+    }
+  },
 };
 
 activeShape.welcome(new L_TetrisMirrored(config.entryX, config.entryY));
@@ -241,7 +283,7 @@ activeShape.welcome(new L_TetrisMirrored(config.entryX, config.entryY));
 
 
 
-// let g = new S_TetrisMirrored(200, 200)
+// let g = new S_TetrisMirrored(200, 200)1
 // let l = new L_Tetris(300, 400);
 // l.drawFilled();
 
@@ -269,7 +311,7 @@ const keydownHandler = function() {
     a: (function() { activeShape.rotate(90) }),
   }
   Object.keys(listenedKeys).forEach((name) => {if(event.key === name) { listenedKeys[name]() } });
-  checkIfHitTheBottom()
+  activeShape.checkPositionRelativeToBottom()
 }
 
 window.addEventListener('keydown', keydownHandler);
