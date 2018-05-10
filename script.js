@@ -17,7 +17,9 @@ function setup(modValue, x, y) {
     entryY: entryY,
     width: width,
     height: height,
-    bottom: generateBottomVertices(width, height, mod)
+    bottom: generateBottomVertices(width, height, mod),
+    widthInModules: width/mod,
+    heightInModules: height/mod,
   }
 }
 config = setup(10, 40, 50);
@@ -166,6 +168,7 @@ Tetris.prototype.drawOutline = function() {
   ctx.stroke();
 }
 Tetris.prototype.drawFilled = function() {
+  game.render()
   this.drawOutline();
   ctx.fill();
 }
@@ -197,31 +200,11 @@ Tetris.prototype.rotate = function(angle) {
   this.drawFilled();
 }
 
-function checkIfHitTheBottom(tetris) {
-  // (function drawGrid() {
-  //   const width = config.width;
-  //   const height = config.height;
-  //   const mod = config.mod
-  //   for (let i = 0; i < width; i ++) {
-  //     ctx.beginPath();
-  //     ctx.moveTo(0, i * config.mod);
-  //     ctx.lineTo(width, i * config.mod);
-  //     ctx.stroke();
-  //   }    
-  // })()
-  // (function drawBottomLine() {
-  //   ctx.beginPath();
-  //   ctx.moveTo(0, config.height-10);
-  //   ctx.lineTo(config.width, config.height-10);
-  //   ctx.stroke();
-  // })()
-  // const tetrisCoords = tetris.squares.forEach((square) => square.anchorPoint)
-  const tetrisCoords = [];
 
 
 
-  checkIfFullLine()
-}
+
+
 function checkIfFullLine() {
   return true;
 }
@@ -234,6 +217,43 @@ game.bottom.getY = function(x) {
     return this.array.find(function(vertex) { return vertex[0] === x }) [1];
   }
 }
+game.bottom.vertices = [];
+
+function create2DEmptyArray(width, height) {
+  let outerArray = new Array(height);
+  let temp = outerArray.slice();
+  console.log(temp)
+  temp.forEach((item) => outerArray.push(new Array(width)));
+  return outerArray;
+}
+
+game.lines = create2DEmptyArray(config.widthInModules, config.heightInModules)
+
+game.bottom.render = function() {
+  if (game.bottom.vertices.length > 0) {
+    clearCanvas();
+    const start = {
+      x: game.bottom.vertices[0][0],
+      y: game.bottom.vertices[0][1]
+    }
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    for (let i = 1; i < game.bottom.vertices.length; i ++) {
+      let next = {
+        x: game.bottom.vertices[i][0],
+        y: game.bottom.vertices[i][1]
+      }
+    ctx.lineTo(next.x, next.y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fill();
+  }  
+}
+game.render = function() {
+  game.bottom.render();
+}
+
 
 const activeShape = {
   instance:{},
@@ -273,7 +293,9 @@ const activeShape = {
 
   checkPositionRelativeToBottom: function() {
     if (this.checkIfTouchesBottom()) {
+      game.bottom.vertices.push(this.instance.vertices)
       this.welcome(new SquareTetris(config.entryX-5, config.entryY-5))
+
     }
   },
 };
