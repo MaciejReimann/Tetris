@@ -11,9 +11,9 @@ body {
 .page {
   display: grid; 
   grid-template-columns: 200px 1fr 100px 100px;
-  grid-template-rows: 100px 40px 1fr 86px;
+  grid-template-rows: 80px 20px 1fr 40px;
   grid-template-areas: "header header header header"
-  						". . score results"
+  						". . score timer"
                        "sidebar main . ."
                        "footer footer footer footer"; 
   height: 100vh;
@@ -22,14 +22,19 @@ body {
  /*grid items*/
 .header { grid-area: header; }
 .score { grid-area: score; }
-.results { grid-area: results; }
+.timer { grid-area: timer; }
 .main { grid-area: main; }
 .sidebar { grid-area: sidebar; }
 .footer { grid-area: footer; }
 
-.canvas {
+.large-canvas {
     align-self: center;
     justify-self: center;
+	border: solid 1px black;
+}
+
+.small-canvas {
+	align-self: flex-end;
 	border: solid 1px black;
 }
 
