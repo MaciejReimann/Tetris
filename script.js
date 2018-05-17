@@ -313,6 +313,12 @@ function mirror(vertices) {
 // console.log(activeShape().moveRight())
 
 
+// --------------------------------------------------------
+// --------------------------------------------------------
+// ----------------- TETRIS FACTORY  ----------------------
+// --------------------------------------------------------
+// --------------------------------------------------------
+
 const tetrisFactory = (function(unit) {
   const modularUnit = unit;
   const defaultColor = 'blue';
@@ -321,7 +327,7 @@ const tetrisFactory = (function(unit) {
   const possibleShapes = ['square-type', 's-type', 'z-type'];
   
   // --=-- BASIC MODULAR UNIT CONSTRUCTOR -----
-  
+
   function Square(point) { // point = {x: x, y: y}; in global coordinates
     this.mod = modularUnit;
     this.center = point;
@@ -355,11 +361,20 @@ const tetrisFactory = (function(unit) {
     ctx.fillStyle = color || this.color;
     ctx.fill();
   };
-
+  Square.prototype.moveRight = function() { // moves the center right
+    this.center.x += this.mod;
+  };
+  Square.prototype.moveDown = function() { // moves the center left
+    this.center.y += this.mod;
+  };
+  Square.prototype.moveLeft = function() { // moves the center down
+    this.center.x -= this.mod;
+  };
   // --- POSSIBLE TETRIS SHAPES CONSTRUCTORS ---
 
   function Tetris_Square(pivot) {
     Tetris.call(this, pivot);
+    this.name = 'square-type';
     this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot
       {x: -0.5, y: 0.5}, {x: -0.5, y: -0.5}, {x: 0.5, y: -0.5}, {x: 0.5, y: 0.5}
     ];
@@ -369,6 +384,7 @@ const tetrisFactory = (function(unit) {
     
   function Tetris_S(pivot) {
     Tetris.call(this, pivot);
+    this.name = 's-type';
     this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot
       {x: -1, y: 0.5}, {x: 0, y: 0.5}, {x: 0, y: -0.5}, {x: 1, y: -0.5}
     ]
@@ -379,6 +395,7 @@ const tetrisFactory = (function(unit) {
   function Tetris_Z(pivot) {
     Tetris.call(this, pivot);
     Tetris_S.call(this, pivot);
+    this.name = 'z-type';
     this.squareCenters = mirror(this.squareCenters);
   }
   Tetris_Z.prototype = Object.create(Tetris.prototype);
@@ -416,6 +433,22 @@ const tetrisFactory = (function(unit) {
     this.squares.forEach((square) => square.drawFill(color));
   };
 
+  // --------- TETRIS TRANSFORMATIONS ----------
+
+  Tetris.prototype.moveRight = function() {
+    this.squares.forEach((square) => square.moveRight());
+    console.log(this)
+    // this.pivot.x += this.mod;
+  }
+  Tetris.prototype.moveDown = function() {
+    this.squares.forEach((square) => square.moveDown());
+    this.drawFill();
+  }
+  Tetris.prototype.moveLeft = function() {
+    this.squares.forEach((square) => square.moveLeft());
+    this.drawFill();
+  }
+
   // -------- FACTORY INTERFACE ---------
 
 	const produce = function(type, contextCanvas, start) {
@@ -429,68 +462,105 @@ const tetrisFactory = (function(unit) {
         return new Tetris_Z(start);
     }  
 	};
-  const produceRandom = function(contextCanvas, start) {
-    const randomType = getRandomItem(possibleShapes);
-    return produce(randomType, contextCanvas, start)
-  };
+  const getRandomName = function() {
+     return getRandomItem(possibleShapes);
+  }; 
 	return {
-    produceRandom: produceRandom
+    produce: produce,
+    getRandomName: getRandomName
 	};
 })(view.config.modularUnit);
 
 
-
-// const tetrisExp1 = tetrisFactory.produce('s-type', view.smallCanvas, view.config.smallCanvas.startPoints[0]);
-// const tetrisExp2 = tetrisFactory.produce('z-type', view.smallCanvas, view.config.smallCanvas.startPoints[1]);
-// const tetrisExp3 = tetrisFactory.produce('square-type', view.smallCanvas, view.config.smallCanvas.startPoints[2]);
-
-
-// tetrisExp1.drawFill('lightblue')
-// tetrisExp2.drawFill('orange')
-// tetrisExp3.drawFill('magenta')
-
-// myTetris4 = tetrisFactory.produceRandom(view.largeCanvas, config.largeCanvas.startingPoints[0])
-
-// // const myTetris1 = tetrisFactory.produce('square-type', view.largeCanvas, config.largeCanvas.startingPoints[0]);
-// myTetris4.drawFill('pink');
-
-
-const movableTetris = (function() {
-  let currentInstance;
-
-  const setCurrent = function(tetrisInstance) {
-    currentInstance = tetrisInstance;
-    return currentInstance;
-  };
-
-  const moveLeft = function() {
-    console.log("I moved left!");
-  }
-  const moveRight = function() {
-    console.log("I moved right!");
-  }
-  const moveDown = function() {
-    console.log("I moved down!");
-  }
-  return {
-    setCurrent: setCurrent,
-    moveLeft: moveLeft,
-    moveRight: moveRight,
-    moveDown: moveDown
-  }
-})();
+// --------------------------------------------------------
+// --------------------------------------------------------
+// ------------------- GAME OBJECT  -----------------------
+// --------------------------------------------------------
+// --------------------------------------------------------
 
 
 const game = (function() {
   const showMessage = view.showMessage;
-  const gameboard_startPoint = view.config.largeCanvas.startPoints[0];
+  const smallCanvas = view.smallCanvas; // .getElement()
+  const largeCanvas = view.largeCanvas; // .getElement()
+  // const exhibition_startPoints = view.config.smallCanvas.startPoints;
+  // closures; to be assigned/udated by the below functions
   let gameStatus;
   let clockInterval;
   let fallingInterval;
   let fallingRate = 1000;
-  let fallingTetris;
-  const tetrisExp1 = tetrisFactory.produce('s-type', view.smallCanvas, view.config.smallCanvas.startPoints[0]);
+  // let fallingTetris;
   // let tetris - TUTAJ W KOŃCU TRZEBA POŁĄCZYĆ TO Z FALLINGTETRIS
+
+  const nextTetris = (function() {
+    const canvas = view.smallCanvas;
+    const ctx = view.smallCanvas.getContext('2d');
+    const names = []; // populated by 3 possible Tetris types names; first from the array is assigned to fallingTetris;   
+    const startPoints = view.config.smallCanvas.startPoints;
+
+    const generateNames = function() {
+      startPoints.forEach((point) => names.push(tetrisFactory.getRandomName()))
+      console.log(names);
+    }();
+    function createTetris() {
+      let tetrisArray = []; 
+      startPoints.forEach((point, index) => {
+        tetrisArray.push(tetrisFactory.produce(names[ index ], canvas, point));
+      });
+      return tetrisArray;
+    };
+    function getFirstName() {
+      const firstName = names.shift();
+      names.push(tetrisFactory.getRandomName());
+      render();
+      return firstName;
+    };
+    function clear() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+    };
+    function render() {
+      clear();
+      createTetris().forEach((tetris) => tetris.drawFill("pink"));
+      console.log("Small canvas rendered")
+    };
+    return {
+      render: render,
+      getFirstName: getFirstName
+    };
+
+  })();
+
+  const fallingTetris = (function() {
+    const canvas = view.largeCanvas;
+    const startPoint = view.config.largeCanvas.startPoints[0];
+    const getNextName = nextTetris.getFirstName;
+    // closure;
+    let currentInstance;
+
+    const place = function() {
+      currentInstance = tetrisFactory.produce(getNextName(), canvas, startPoint);
+      currentInstance.drawFill('grey');
+      console.log("Tetris starts falling");
+      return currentInstance;
+    };
+
+    const moveLeft = function() {
+      console.log("I moved left!");
+    }
+    const moveRight = function() {
+      currentInstance.moveRight();
+      console.log("I moved right!");
+    }
+    const moveDown = function() {
+      console.log("I moved down!");
+    }
+    return {
+      place: place,
+      moveLeft: moveLeft,
+      moveRight: moveRight,
+      moveDown: moveDown
+    }
+  })();
 
   function addIntervals() {
     clockInterval = setInterval(clockTicking, 1000);
@@ -508,19 +578,6 @@ const game = (function() {
     // tetris.moveDown();
   };
 
-  function showTetrisReady() {
-    console.log("Tetris exhibition ready")
-  };
-  function placeFallingTetris() {
-    fallingTetris = movableTetris.setCurrent(tetrisExp1);
-    tetrisExp1.drawFill('lightblue');
-
-    keydownHandler.setTarget(fallingTetris);
-    addKeyControls();
-    console.log(gameboard_startPoint);
-    console.log("Tetris starts falling");
-  };
-
   // ---- GAME CONTROLS ----  
 
   function start() {
@@ -530,7 +587,8 @@ const game = (function() {
     gameStatus = 'playing';
 
     addIntervals();
-    placeFallingTetris();
+    fallingTetris.place();
+    addKeyControls();
   };
   function pause() {
     if (gameStatus !== 'paused') {
@@ -550,7 +608,8 @@ const game = (function() {
   };
   function welcome() {
     showMessage('start');
-    showTetrisReady();
+    nextTetris.render();
+    //largeCanvas.render()
     timer.place();
     window.addEventListener('keydown', gameStatusHandler);
     return "Game loaded";
@@ -568,34 +627,26 @@ const game = (function() {
       start();
     }
   };  
-
-  const keydownHandler = (function() {
-    let targetObject;
-    const setTarget = function(target) {
-      targetObject = target;
-    };
-    const fire = function() {
-      if (!targetObject) {
-        throw new Error('No keydown target set!')   
-      }  
-      const listenedKeys = {
-        ArrowDown: targetObject.moveDown,
-        ArrowRight: targetObject.moveRight,
-        ArrowLeft: targetObject.moveLeft,
+  const keydownHandler = function() {
+    let targetObject = fallingTetris;
+    console.log(event.key)
+    if (!targetObject) {
+      throw new Error('No keydown target set!')   
+    }  
+    const listenedKeys = {
+      ArrowDown: targetObject.moveDown,
+      ArrowRight: targetObject.moveRight,
+      ArrowLeft: targetObject.moveLeft,
   //   z: (function() { activeShape.rotate(-90) }),
   //   a: (function() { activeShape.rotate(90) }),
-      }
-      Object.keys(listenedKeys).forEach((name) => {if(event.key === name) { listenedKeys[name]() } });
-    };
-    return {
-      setTarget: setTarget,
-      fire: fire
-    };
-  })();
+    }
+    Object.keys(listenedKeys).forEach((name) => {if(event.key === name) { listenedKeys[name]() } });
+  };
   function addKeyControls() {
-    window.addEventListener('keydown', keydownHandler.fire)
+    window.addEventListener('keydown', keydownHandler)
   };
 
+  // game object has only one method which is called with an IIFE
   return {
     welcome: welcome,
   }
