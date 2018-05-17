@@ -5,36 +5,77 @@ view.main = document.querySelector('.main');
 view.footer = document.querySelector('.footer');
 view.timer = document.querySelector('.timer');
 
+view.showMessage = function(shortMessage) {
+  const parentElement = view.footer;
+  clear(parentElement);
+  const messageDiv = document.createElement("div");
+  let message;
+  if (shortMessage === 'start') {
+    message = "Start game by pressing any key";
+  } else if (shortMessage === 'pause') {
+    message = "Pause game by pressing spacebar";
+  } else if (shortMessage === 'resume') {
+    message = "Resume game by pressing spacebar";
+  }
+  messageDiv.textContent = message;
+  parentElement.appendChild(messageDiv);
+};
+view.createCanvas = function(config) {  
+  const canvas = document.createElement('canvas');
+  canvas.className = config.className;
+  canvas.width = config.width;
+  canvas.height = config.height;  
+  config.parentElement.appendChild(canvas);
+  return canvas;
+};
+
 // --- CANVAS SETUP ----
 
-config = {
-  modularUnit: 10,
-	largeCanvas: {
-		width: 400,
-		height: 450,
-		parentElement: view.main,
-		className: 'large-canvas'
-	},
-	smallCanvas: {		
-		width: 400,
-		height: 100,
-		parentElement: view.main,
-		className: 'small-canvas'
-	},
-};
+view.config = (function(mod, width, height) {
+  const largeWidth = width * mod;
+  const largeHeight = height * mod;
+  const smallWidth = largeWidth;
+  const smallHeight = largeHeight / 9;
+  function getOffsetPoints(start, amount, offsetX) {
+    let arrayOfPoints = [start];
+    for (let i = 1; i < amount; i++) {
+      let nextPoint = {
+        x: arrayOfPoints[i - 1].x + offsetX,
+        y: arrayOfPoints[i - 1].y
+      }
+      arrayOfPoints.push(nextPoint);
+    }
+    return arrayOfPoints;
+  };
+  return {
+    modularUnit: mod,
+    largeCanvas: {
+      width: largeWidth,
+      height: largeHeight,
+      parentElement: view.main,
+      className: 'large-canvas',
+      startPoints: [{
+        x: largeWidth / 2, 
+        y: 5
+      }]
+    },
+    smallCanvas: {    
+      width: smallWidth,
+      height: smallHeight,
+      parentElement: view.main,
+      className: 'small-canvas',
+      startPoints: getOffsetPoints({
+        x: smallWidth / 2, 
+        y: smallHeight / 2
+      }, 3, 70)
+    },
+  };
+})(10, 40, 45);
 
-view.largeCanvas = createCanvas(config.largeCanvas);
-view.smallCanvas = createCanvas(config.smallCanvas);
+view.largeCanvas = view.createCanvas(view.config.largeCanvas);
+view.smallCanvas = view.createCanvas(view.config.smallCanvas);
 view.main.insertBefore(view.smallCanvas, view.largeCanvas);
 
-function createCanvas(config) { 	
-	const canvas = document.createElement('canvas');
-	canvas.className = config.className;
-	canvas.width = config.width;
-	canvas.height = config.height;  
-	config.parentElement.appendChild(canvas);
-	return canvas;
-};
 // --- DOM MANIPULATION ----
 
 function clear(parentElement) {
@@ -54,7 +95,7 @@ const timer = (function () {
   const renderIncremented = function() {
     timeInSeconds++;
     render();
-  }
+  };
   const render = function() {
     clear(parentElement);
     place();
@@ -88,6 +129,12 @@ const timer = (function () {
 // // -------------------------------------------
 // 
 
+function getRandomItem(array) {
+  const length = array.length;
+  const randomNumber = Math.floor(Math.random() * length);
+  return array[randomNumber];
+}
+
 function translateToGlobal(localZero, vertex, mod) {
   return { 
     x: localZero.x + vertex.x * mod,
@@ -102,6 +149,7 @@ function mirror(vertices) {
   });
   return mirrored;
 };
+
 
 // function translateToCartesian(polarVerticesArray) {
 //   let cartesianVertices = [];
@@ -266,10 +314,14 @@ function mirror(vertices) {
 
 
 const tetrisFactory = (function(unit) {
-  let ctx;
   const modularUnit = unit;
   const defaultColor = 'blue';
-
+  let ctx;
+  // const possibleShapes = ['square-type', 's-type', 'z-type', 'i-type', 'l-type', 'l-type-mirrored'];
+  const possibleShapes = ['square-type', 's-type', 'z-type'];
+  
+  // --=-- BASIC MODULAR UNIT CONSTRUCTOR -----
+  
   function Square(point) { // point = {x: x, y: y}; in global coordinates
     this.mod = modularUnit;
     this.center = point;
@@ -364,7 +416,7 @@ const tetrisFactory = (function(unit) {
     this.squares.forEach((square) => square.drawFill(color));
   };
 
-// -------- FACTORY INTERFACE ---------
+  // -------- FACTORY INTERFACE ---------
 
 	const produce = function(type, contextCanvas, start) {
     ctx = contextCanvas.getContext('2d');
@@ -375,60 +427,42 @@ const tetrisFactory = (function(unit) {
         return new Tetris_S(start);
     } else if (type === 'z-type') {
         return new Tetris_Z(start);
-    }
-  
+    }  
 	};
+  const produceRandom = function(contextCanvas, start) {
+    const randomType = getRandomItem(possibleShapes);
+    return produce(randomType, contextCanvas, start)
+  };
 	return {
-		produce: produce,
+    produceRandom: produceRandom
 	};
-})(config.modularUnit);
+})(view.config.modularUnit);
 
 
-config.smallCanvas.startingPoints = [
-  { 
-    x: config.smallCanvas.width / 2, 
-    y: config.smallCanvas.height / 2 
-  },
-  { 
-    x: config.smallCanvas.width / 2 + 80, 
-    y: config.smallCanvas.height / 2 
-  },
-  { 
-    x: config.smallCanvas.width / 2 + 160, 
-    y: config.smallCanvas.height / 2 
-  },
-];
-config.largeCanvas.startingPoints = [
-  {
-    x: config.largeCanvas.width / 2, 
-    y: config.modularUnit, 
-  }
-]
 
-const tetrisExp1 = tetrisFactory.produce('s-type', view.smallCanvas, config.smallCanvas.startingPoints[0]);
-const tetrisExp2 = tetrisFactory.produce('z-type', view.smallCanvas, config.smallCanvas.startingPoints[1]);
-const tetrisExp3 = tetrisFactory.produce('square-type', view.smallCanvas, config.smallCanvas.startingPoints[2]);
+// const tetrisExp1 = tetrisFactory.produce('s-type', view.smallCanvas, view.config.smallCanvas.startPoints[0]);
+// const tetrisExp2 = tetrisFactory.produce('z-type', view.smallCanvas, view.config.smallCanvas.startPoints[1]);
+// const tetrisExp3 = tetrisFactory.produce('square-type', view.smallCanvas, view.config.smallCanvas.startPoints[2]);
 
 
-tetrisExp1.drawFill('lightblue')
-tetrisExp2.drawFill('orange')
-tetrisExp3.drawFill('magenta')
+// tetrisExp1.drawFill('lightblue')
+// tetrisExp2.drawFill('orange')
+// tetrisExp3.drawFill('magenta')
 
-const myTetris1 = tetrisFactory.produce('square-type', view.largeCanvas, config.largeCanvas.startingPoints[0]);
-myTetris1.drawFill('pink');
+// myTetris4 = tetrisFactory.produceRandom(view.largeCanvas, config.largeCanvas.startingPoints[0])
+
+// // const myTetris1 = tetrisFactory.produce('square-type', view.largeCanvas, config.largeCanvas.startingPoints[0]);
+// myTetris4.drawFill('pink');
 
 
-const fallingTetris = (function() {
+const movableTetris = (function() {
   let currentInstance;
 
   const setCurrent = function(tetrisInstance) {
     currentInstance = tetrisInstance;
+    return currentInstance;
   };
 
-  const keepsFalling = function() {
-    setTimeout(keepsFalling, fallingRate);
-    moveDown();
-  };
   const moveLeft = function() {
     console.log("I moved left!");
   }
@@ -440,132 +474,129 @@ const fallingTetris = (function() {
   }
   return {
     setCurrent: setCurrent,
-    keepsFalling: keepsFalling,
     moveLeft: moveLeft,
     moveRight: moveRight,
     moveDown: moveDown
   }
 })();
 
-// fallingTetris.keepsFalling()
-
-
-// -------------------------------------------
-// ------------- USER INTERFACE --------------
-
-const keydownHandler = (function() {
-  let targetObject;
-  const setTarget = function(target) {
-    targetObject = target;
-  };
-  const fire = function() {
-    if (!targetObject) {
-        throw new Error('No keydown target set!')   
-    }  
-    const listenedKeys = {
-      ArrowDown: targetObject.moveDown,
-      ArrowRight: targetObject.moveRight,
-      ArrowLeft: targetObject.moveLeft,
-  //   z: (function() { activeShape.rotate(-90) }),
-  //   a: (function() { activeShape.rotate(90) }),
-    }
-      Object.keys(listenedKeys).forEach((name) => {if(event.key === name) { listenedKeys[name]() } });
-  }
-
-  return {
-    setTarget: setTarget,
-    fire: fire
-  };
-
-})();
-
-function addListeners() {
-  window.addEventListener('keydown', keydownHandler.fire)
-}
 
 const game = (function() {
+  const showMessage = view.showMessage;
+  const gameboard_startPoint = view.config.largeCanvas.startPoints[0];
   let gameStatus;
-  let interval;
+  let clockInterval;
+  let fallingInterval;
+  let fallingRate = 1000;
+  let fallingTetris;
+  const tetrisExp1 = tetrisFactory.produce('s-type', view.smallCanvas, view.config.smallCanvas.startPoints[0]);
+  // let tetris - TUTAJ W KOŃCU TRZEBA POŁĄCZYĆ TO Z FALLINGTETRIS
 
-  function onInterval() {
+  function addIntervals() {
+    clockInterval = setInterval(clockTicking, 1000);
+    fallingInterval = setInterval(fallDown, fallingRate);  
+  };
+  function removeIntervals() {
+    clearInterval(clockInterval);
+    clearInterval(fallingInterval); 
+  };
+  function clockTicking() {
     timer.renderIncremented();
     console.log("tetris wil be falling");
-  }
+  };
+  function fallDown() {
+    // tetris.moveDown();
+  };
+
+  function showTetrisReady() {
+    console.log("Tetris exhibition ready")
+  };
+  function placeFallingTetris() {
+    fallingTetris = movableTetris.setCurrent(tetrisExp1);
+    tetrisExp1.drawFill('lightblue');
+
+    keydownHandler.setTarget(fallingTetris);
+    addKeyControls();
+    console.log(gameboard_startPoint);
+    console.log("Tetris starts falling");
+  };
+
+  // ---- GAME CONTROLS ----  
 
   function start() {
-    interval = setInterval(onInterval, 1000);
     if (gameStatus !== 'playing') {
       showMessage('pause');
     };
-    gameStatus = 'playing';    
+    gameStatus = 'playing';
+
+    addIntervals();
+    placeFallingTetris();
   };
   function pause() {
-    clearInterval(interval);
     if (gameStatus !== 'paused') {
       showMessage('resume');
     };
     gameStatus = 'paused';
+
+    removeIntervals();
   };
   function resume() {
     if (gameStatus !== 'playing') {
-      showMessage('resume');
+      showMessage('pause');
     };
     gameStatus = 'playing';
-    start();
+
+    addIntervals()
   };
-  function getStatus() {
-    return gameStatus;
+  function welcome() {
+    showMessage('start');
+    showTetrisReady();
+    timer.place();
+    window.addEventListener('keydown', gameStatusHandler);
+    return "Game loaded";
   };
+
+  // -------------------------------------------
+  // ------------- USER INTERFACE --------------
+
+  function gameStatusHandler(event) {
+    if (event.code === "Space" && gameStatus === 'playing') {
+      pause();
+    } else if (event.code === "Space" && gameStatus === 'paused') {
+      resume();
+    } else if (gameStatus === undefined) {
+      start();
+    }
+  };  
+
+  const keydownHandler = (function() {
+    let targetObject;
+    const setTarget = function(target) {
+      targetObject = target;
+    };
+    const fire = function() {
+      if (!targetObject) {
+        throw new Error('No keydown target set!')   
+      }  
+      const listenedKeys = {
+        ArrowDown: targetObject.moveDown,
+        ArrowRight: targetObject.moveRight,
+        ArrowLeft: targetObject.moveLeft,
+  //   z: (function() { activeShape.rotate(-90) }),
+  //   a: (function() { activeShape.rotate(90) }),
+      }
+      Object.keys(listenedKeys).forEach((name) => {if(event.key === name) { listenedKeys[name]() } });
+    };
+    return {
+      setTarget: setTarget,
+      fire: fire
+    };
+  })();
+  function addKeyControls() {
+    window.addEventListener('keydown', keydownHandler.fire)
+  };
+
   return {
-    getStatus: getStatus,
-    start: start,
-    pause: pause,
-    resume: resume
+    welcome: welcome,
   }
-})()
-
-const newGame = game;
-
-const showMessage = function(shortMessage) {
-  const parentElement = view.footer;
-  clear(parentElement);
-  const messageDiv = document.createElement("div");
-  let message;
-  if (shortMessage === 'start') {
-    message = "Start game by pressing any key";
-  } else if (shortMessage === 'pause') {
-    message = "Pause game by pressing spacebar";
-  } else if (shortMessage === 'resume') {
-    message = "Resume game by pressing spacebar";
-  }
-  messageDiv.textContent = message;
-  parentElement.appendChild(messageDiv);
-}
-
-const gameStatusHandler = function(event) {
-  let game = newGame;
-  if (event.code === "Space" && game.getStatus() === 'playing') {
-    game.pause();
-  } else if (event.code === "Space" && game.getStatus() === 'paused') {
-    game.resume();
-  } else if (game.getStatus() === undefined) {
-    game.start();
-  }
-};
-
-function welcome() {
-  showMessage('start');
-  timer.place();
-}
-
-window.addEventListener('keydown', gameStatusHandler);
-
-welcome();
-
-
-
-
-keydownHandler.setTarget(fallingTetris);
-// addListeners()
-
-
+})().welcome();
