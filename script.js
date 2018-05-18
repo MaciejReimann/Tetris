@@ -20,14 +20,6 @@ view.showMessage = function(shortMessage) {
   messageDiv.textContent = message;
   parentElement.appendChild(messageDiv);
 };
-view.createCanvas = function(config) {  
-  const canvas = document.createElement('canvas');
-  canvas.className = config.className;
-  canvas.width = config.width;
-  canvas.height = config.height;  
-  config.parentElement.appendChild(canvas);
-  return canvas;
-};
 
 // --- CANVAS SETUP ----
 
@@ -72,9 +64,21 @@ view.config = (function(mod, width, height) {
   };
 })(10, 40, 45);
 
-view.largeCanvas = view.createCanvas(view.config.largeCanvas);
-view.smallCanvas = view.createCanvas(view.config.smallCanvas);
-view.main.insertBefore(view.smallCanvas, view.largeCanvas);
+const Canvas = function(config) {
+  this.canvas = document.createElement('canvas');
+  this.canvas.className = config.className;
+  this.canvas.width = config.width;
+  this.canvas.height = config.height;  
+  config.parentElement.appendChild(this.canvas);
+  this.ctx = this.canvas.getContext('2d');
+};
+Canvas.prototype.clear = function() {
+  this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+};
+
+view.largeCanvas = new Canvas(view.config.largeCanvas);
+view.smallCanvas = new Canvas(view.config.smallCanvas);
+view.main.insertBefore(view.smallCanvas.canvas, view.largeCanvas.canvas);
 
 // --- DOM MANIPULATION ----
 
@@ -437,10 +441,10 @@ const tetrisFactory = (function(unit) {
 
   Tetris.prototype.moveRight = function() {
     this.squares.forEach((square) => square.moveRight());
-    console.log(this)
+    this.drawFill();
     // this.pivot.x += this.mod;
   }
-  Tetris.prototype.moveDown = function() {
+  Tetris.prototype.moveDown = function() {      
     this.squares.forEach((square) => square.moveDown());
     this.drawFill();
   }
@@ -451,8 +455,8 @@ const tetrisFactory = (function(unit) {
 
   // -------- FACTORY INTERFACE ---------
 
-	const produce = function(type, contextCanvas, start) {
-    ctx = contextCanvas.getContext('2d');
+	const produce = function(type, canvas, start) {
+    ctx = canvas.ctx; // Tetris method use this closure; ctx is not defined in tetris constructor;
 		// console.log(type, ctx, start.x, start.y);
     if (type === 'square-type') {
         return new Tetris_Square(start);
@@ -481,26 +485,24 @@ const tetrisFactory = (function(unit) {
 
 const game = (function() {
   const showMessage = view.showMessage;
-  const smallCanvas = view.smallCanvas; // .getElement()
-  const largeCanvas = view.largeCanvas; // .getElement()
-  // const exhibition_startPoints = view.config.smallCanvas.startPoints;
+  const smallCanvas = view.smallCanvas;
+  const largeCanvas = view.largeCanvas;
+
   // closures; to be assigned/udated by the below functions
   let gameStatus;
   let clockInterval;
   let fallingInterval;
   let fallingRate = 1000;
-  // let fallingTetris;
-  // let tetris - TUTAJ W KOŃCU TRZEBA POŁĄCZYĆ TO Z FALLINGTETRIS
 
   const nextTetris = (function() {
     const canvas = view.smallCanvas;
-    const ctx = view.smallCanvas.getContext('2d');
+    const ctx = view.smallCanvas.ctx;
     const names = []; // populated by 3 possible Tetris types names; first from the array is assigned to fallingTetris;   
     const startPoints = view.config.smallCanvas.startPoints;
 
     const generateNames = function() {
       startPoints.forEach((point) => names.push(tetrisFactory.getRandomName()))
-      console.log(names);
+      // console.log(names);
     }();
     function createTetris() {
       let tetrisArray = []; 
@@ -530,37 +532,22 @@ const game = (function() {
 
   })();
 
-  const fallingTetris = (function() {
-    const canvas = view.largeCanvas;
-    const startPoint = view.config.largeCanvas.startPoints[0];
-    const getNextName = nextTetris.getFirstName;
-    // closure;
+  const fallingTetris = (function(canvas, startPoint) {
+    const getName = nextTetris.getFirstName;
     let currentInstance;
 
-    const place = function() {
-      currentInstance = tetrisFactory.produce(getNextName(), canvas, startPoint);
-      currentInstance.drawFill('grey');
-      console.log("Tetris starts falling");
+    const getInstance = function() {
       return currentInstance;
     };
-
-    const moveLeft = function() {
-      console.log("I moved left!");
-    }
-    const moveRight = function() {
-      currentInstance.moveRight();
-      console.log("I moved right!");
-    }
-    const moveDown = function() {
-      console.log("I moved down!");
-    }
+    const placeOnStart = function() {
+      currentInstance = tetrisFactory.produce(getName(), canvas, startPoint);
+      currentInstance.drawFill('grey');
+    };
     return {
-      place: place,
-      moveLeft: moveLeft,
-      moveRight: moveRight,
-      moveDown: moveDown
-    }
-  })();
+      placeOnStart: placeOnStart,
+      getInstance: getInstance,
+    };
+  })(view.largeCanvas, view.config.largeCanvas.startPoints[0]);
 
   function addIntervals() {
     clockInterval = setInterval(clockTicking, 1000);
@@ -575,7 +562,7 @@ const game = (function() {
     console.log("tetris wil be falling");
   };
   function fallDown() {
-    // tetris.moveDown();
+    fallingTetris.getInstance().moveDown();
   };
 
   // ---- GAME CONTROLS ----  
@@ -587,8 +574,8 @@ const game = (function() {
     gameStatus = 'playing';
 
     addIntervals();
-    fallingTetris.place();
-    addKeyControls();
+    fallingTetris.placeOnStart();
+    addKeyControls(fallingTetris.getInstance());
   };
   function pause() {
     if (gameStatus !== 'paused') {
@@ -628,22 +615,21 @@ const game = (function() {
     }
   };  
   const keydownHandler = function() {
-    let targetObject = fallingTetris;
-    console.log(event.key)
+    let targetObject = this;
     if (!targetObject) {
       throw new Error('No keydown target set!')   
-    }  
+    };
     const listenedKeys = {
-      ArrowDown: targetObject.moveDown,
-      ArrowRight: targetObject.moveRight,
-      ArrowLeft: targetObject.moveLeft,
+      ArrowDown: targetObject.moveDown.bind(targetObject),
+      ArrowRight: targetObject.moveRight.bind(targetObject),
+      ArrowLeft: targetObject.moveLeft.bind(targetObject),
   //   z: (function() { activeShape.rotate(-90) }),
   //   a: (function() { activeShape.rotate(90) }),
     }
     Object.keys(listenedKeys).forEach((name) => {if(event.key === name) { listenedKeys[name]() } });
   };
-  function addKeyControls() {
-    window.addEventListener('keydown', keydownHandler)
+  function addKeyControls(obj) {
+    window.addEventListener('keydown', keydownHandler.bind(obj))
   };
 
   // game object has only one method which is called with an IIFE
