@@ -23,12 +23,12 @@ view.showMessage = function(shortMessage) {
 
 // --- CANVAS SETUP ----
 
-view.config = (function(mod, width, height) {
+view.canvasConfig = (function(mod, width, height) { // takes in modular unit value and canvas dimensions expressed in this value
   const largeWidth = width * mod;
   const largeHeight = height * mod;
   const smallWidth = largeWidth;
   const smallHeight = largeHeight / 9;
-  function getOffsetPoints(start, amount, offsetX) {
+  function getOffsetPoints(start, amount, offsetX) { // global units 
     let arrayOfPoints = [start];
     for (let i = 1; i < amount; i++) {
       let nextPoint = {
@@ -46,17 +46,17 @@ view.config = (function(mod, width, height) {
       height: largeHeight,
       parentElement: view.main,
       className: 'large-canvas',
-      startPoints: [{
+      startPoints: [{  // global units 
         x: largeWidth / 2, 
         y: 5
       }]
     },
-    smallCanvas: {    
+    smallCanvas: {
       width: smallWidth,
       height: smallHeight,
       parentElement: view.main,
       className: 'small-canvas',
-      startPoints: getOffsetPoints({
+      startPoints: getOffsetPoints({  // global units 
         x: smallWidth / 2, 
         y: smallHeight / 2
       }, 3, 70)
@@ -65,19 +65,30 @@ view.config = (function(mod, width, height) {
 })(10, 40, 45);
 
 const Canvas = function(config) {
+  this.config = config;
   this.canvas = document.createElement('canvas');
   this.canvas.className = config.className;
   this.canvas.width = config.width;
   this.canvas.height = config.height;  
   config.parentElement.appendChild(this.canvas);
   this.ctx = this.canvas.getContext('2d');
+  this.shapes = [];
 };
 Canvas.prototype.clear = function() {
   this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 };
+// Canvas.prototype.render = function(shape) {
+//   console.log("canvas constructor render")
+// }
+// Canvas.prototype.addContent = function(shape) {
+//   this.shapes.push(shape);
+// }
+// Canvas.prototype.addContent = function(shape) {
+//   this.shapes.push(shape);
+// }
 
-view.largeCanvas = new Canvas(view.config.largeCanvas);
-view.smallCanvas = new Canvas(view.config.smallCanvas);
+view.largeCanvas = new Canvas(view.canvasConfig.largeCanvas);
+view.smallCanvas = new Canvas(view.canvasConfig.smallCanvas);
 view.main.insertBefore(view.smallCanvas.canvas, view.largeCanvas.canvas);
 
 // --- DOM MANIPULATION ----
@@ -103,7 +114,6 @@ const timer = (function () {
   const render = function() {
     clear(parentElement);
     place();
-    // console.log("Timer rendered")
   };
   const place = function() {
     timerDiv.textContent = timeInSeconds;
@@ -115,74 +125,66 @@ const timer = (function () {
   }
 })();
 
-
- // const setInterval(start, 1000);
-
-// --- GAME SETUP ----
-
-
-// function generateBottomVertices(width, height, mod) {
-//   const bottomVertices = [];
-//   const y = height
-//   for (let x = 0; x < width; x += mod) {
-//     bottomVertices.push([x, y])
-//   }
-//   return bottomVertices;
-// }
-
-// // -------------------------------------------
-// 
+// ----- HELPER FUNCTIONS ------
 
 function getRandomItem(array) {
-  const length = array.length;
-  const randomNumber = Math.floor(Math.random() * length);
-  return array[randomNumber];
-}
+  return array[ Math.floor(Math.random() * array.length) ];
+};
 
-function translateToGlobal(localZero, vertex, mod) {
-  return { 
-    x: localZero.x + vertex.x * mod,
-    y: localZero.y + vertex.y * mod 
+function translateToGlobal(localZero, localVertices, mod) { // localZero in global units, localVertices in local units, mod - the size of the local unit
+  if(localVertices instanceof Array) {
+    return localVertices.map( (localVertex) => translateToGlobal(localZero, localVertex, mod) );
+   } else {
+    let localVertex = localVertices;
+    return { // vertex in global units
+      x: localZero.x + localVertex.x * mod,
+      y: localZero.y + localVertex.y * mod 
+    };
   };
 };
-function mirror(vertices) {
-  let mirrored = [];
-  vertices.forEach((vertex) => {
-    let mirroredVertex = {x: vertex.x * -1, y: vertex.y};
-    mirrored.push(mirroredVertex);
-  });
-  return mirrored;
+
+function translateToCartesian(vertices) {
+if(vertices instanceof Array) {
+    return vertices.map( (vertex) => translateToPolar(vertex) );
+  } else { // TODO: Add argument validation - check if vertices has r and angle property and their value is number, else throw an Error;  
+    let vertex = vertices;
+    let n = 0; // optional angle parameter    
+    return {
+      x: vertex.r * Math.cos( (vertex.angle - n) * (Math.PI / 180) ),
+      y: vertex.r * Math.sin( (vertex.angle - n) * (Math.PI / 180) ),
+    };
+  };
+};
+
+function translateToPolar(vertices) {
+  if(vertices instanceof Array) {
+    return vertices.map( (vertex) => translateToPolar(vertex) );
+  } else { // TODO: Add argument validation - check if vertices has x and y property and their value is number, else throw an Error;  
+    let vertex = vertices;
+    return {
+      r: Math.sqrt(vertex.x * vertex.x + vertex.y * vertex.y),
+      angle: Math.atan2(vertex.x, vertex.y) * (180 / Math.PI),
+    };
+  };
+};
+
+function mirrorByY_Axis(vertices) {
+  if(vertices instanceof Array) {
+    return vertices.map( (vertex) => mirrorByY_Axis(vertex) );
+  } else {
+    let vertex = vertices;
+    return {
+      x: vertex.x * -1, 
+      y: vertex.y
+    };
+  };
 };
 
 
-// function translateToCartesian(polarVerticesArray) {
-//   let cartesianVertices = [];
-//   polarVerticesArray.forEach((vertex) => {
-//     let n = 0 // optional angle parameter
-//     let x = vertex.r * Math.cos( (vertex.angle - n) * (Math.PI / 180) ) // x = r * cos(angle - in radians)
-//     let y = vertex.r * Math.sin( (vertex.angle - n) * (Math.PI / 180) ) // y = r * sin(angle - in radians)
-//     vertex = {
-//       x: x,
-//       y: y
-//     }
-//     cartesianVertices.push(vertex);
-//   })
-//   return cartesianVertices;
-// }
 
-// function translateToPolar(verticesArray) {
-//   let polarVertices = [];
-//   verticesArray.forEach((vertex) => {
-//     let r = Math.sqrt(vertex.x * vertex.x + vertex.y * vertex.y);
-//     let angle = Math.atan2(vertex.x, vertex.y) * (180 / Math.PI);
-//     vertex = {
-//       r: r,
-//       angle: angle
-//     }
-//     polarVertices.push(vertex);
-//   })
-//   return polarVertices;
-// }
+
+
+
 // function rotatePolar(polarVerticesArray, angle) {
 //   let rotatedCenters = [];
 //   polarVerticesArray.forEach((vertex) => {
@@ -199,35 +201,6 @@ function mirror(vertices) {
 
 // //------------------------------------------------------
 
-// // const tetrisFactory = (function(context, configuration) { //defines the context for tetris creation; TODO: config should be a part of particular canvas, i.e. factory needs onle one argument
-//   //closures go here
-//   // const ctx = context;
-//   const start = {x: config.entryX, y: config.entryY}; //defines the "0" point;
-//   const mod = config.mod; // the modular unit for object transformation
-            
-//           // --- SQUARE: BASIC UNIT --- 
-
-
-//   Square.prototype.moveRight = function() { // moves the center right
-//     this.center.x += this.mod;
-//   }
-//   Square.prototype.moveDown = function() { // moves the center left
-//     this.center.y += this.mod;
-//   }
-//   Square.prototype.moveLeft = function() { // moves the center down
-//     this.center.x -= this.mod;
-//   }
-
-//   // --- SHAPES --- 
-
-//   function Tetris_S(x,y) {
-//     Tetris.call(this, x, y);
-//     this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot
-//       {x: -1, y: 0.5}, {x: 0, y: 0.5}, {x: 0, y: -0.5}, {x: 1, y: -0.5}
-//     ]
-//   }
-//   Tetris_S.prototype = Object.create(Tetris.prototype); //??????????????
-//   Tetris_S.prototype.constructor = Tetris_S;
 
 //   // --- MAIN CONSTRUCTOR --- 
 
@@ -305,16 +278,6 @@ function mirror(vertices) {
 
 
 
-// const activeShape = function() {
-//   const tetris = new Tetris_S(start.x, start.y);
-//   return {
-//     moveRight: tetris.moveRight
-//     };
-  
-
-// }
-
-// console.log(activeShape().moveRight())
 
 
 // --------------------------------------------------------
@@ -323,16 +286,16 @@ function mirror(vertices) {
 // --------------------------------------------------------
 // --------------------------------------------------------
 
-const tetrisFactory = (function(unit) {
-  const modularUnit = unit;
+const tetrisFactory = (function() {
+  const modularUnit = view.canvasConfig.modularUnit;
+  const possibleShapes = ['square-type', 's-type', 'z-type'];  
   const defaultColor = 'blue';
   let ctx;
   // const possibleShapes = ['square-type', 's-type', 'z-type', 'i-type', 'l-type', 'l-type-mirrored'];
-  const possibleShapes = ['square-type', 's-type', 'z-type'];
   
   // --=-- BASIC MODULAR UNIT CONSTRUCTOR -----
 
-  function Square(point) { // point = {x: x, y: y}; in global coordinates
+  function Square(point) { // point = {x: x, y: y}; in global units
     this.mod = modularUnit;
     this.center = point;
     this.length = this.mod;
@@ -389,7 +352,7 @@ const tetrisFactory = (function(unit) {
   function Tetris_S(pivot) {
     Tetris.call(this, pivot);
     this.name = 's-type';
-    this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot
+    this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot in local units
       {x: -1, y: 0.5}, {x: 0, y: 0.5}, {x: 0, y: -0.5}, {x: 1, y: -0.5}
     ]
   }
@@ -400,7 +363,7 @@ const tetrisFactory = (function(unit) {
     Tetris.call(this, pivot);
     Tetris_S.call(this, pivot);
     this.name = 'z-type';
-    this.squareCenters = mirror(this.squareCenters);
+    this.squareCenters = mirrorByY_Axis(this.squareCenters);
   }
   Tetris_Z.prototype = Object.create(Tetris.prototype);
   Tetris_Z.prototype.constructor = Tetris_Z;
@@ -408,21 +371,17 @@ const tetrisFactory = (function(unit) {
 
   // --------- MAIN TETRIS CONSTRUCTOR ---------
 
-  function Tetris(pivot) {
+  function Tetris(pivot) { // pivot = { x: x, y: y} in global units
     this.mod = modularUnit;
     this.pivot = pivot; 
     this.angle = 0;
     this.squares = []; // to be populated by the Square instances
   };
   Tetris.prototype.getGlobalCenters = function() {
-    let globalCenters = [];
-    this.squareCenters.forEach(function(center) {
-      globalCenters.push(translateToGlobal(this.pivot, center, this.mod));
-    }.bind(this) ); 
-    return globalCenters;
+    return translateToGlobal(this.pivot, this.squareCenters, this.mod);
   };
-  Tetris.prototype.createSquares = function() { // creates Square instances for each squareCenter in the squares array
-    if (this.squares.length === 0 ) {
+  Tetris.prototype.createSquares = function() { // creates Square instances for each squareCenter in the squares array;
+    if (this.squares.length === 0 ) { // if already created do nothing
       this.getGlobalCenters().forEach((point) => { // needs to get the list of center point in global units
         this.squares.push(new Square(point));
       });
@@ -440,30 +399,32 @@ const tetrisFactory = (function(unit) {
   // --------- TETRIS TRANSFORMATIONS ----------
 
   Tetris.prototype.moveRight = function() {
+    this.pivot.x += this.mod;
     this.squares.forEach((square) => square.moveRight());
     this.drawFill();
-    // this.pivot.x += this.mod;
   }
-  Tetris.prototype.moveDown = function() {      
+  Tetris.prototype.moveDown = function() {
+    this.pivot.y += this.mod;
     this.squares.forEach((square) => square.moveDown());
     this.drawFill();
   }
   Tetris.prototype.moveLeft = function() {
+    this.pivot.x -= this.mod;
     this.squares.forEach((square) => square.moveLeft());
     this.drawFill();
   }
 
   // -------- FACTORY INTERFACE ---------
 
-	const produce = function(type, canvas, start) {
+	const produce = function(type, canvas, point) { // type(string), canvas(DOMElement), startPoint - all obligatory
     ctx = canvas.ctx; // Tetris method use this closure; ctx is not defined in tetris constructor;
-		// console.log(type, ctx, start.x, start.y);
+    
     if (type === 'square-type') {
-        return new Tetris_Square(start);
+        return new Tetris_Square( point );
     } else if (type === 's-type') {
-        return new Tetris_S(start);
+        return new Tetris_S( point );
     } else if (type === 'z-type') {
-        return new Tetris_Z(start);
+        return new Tetris_Z( point );
     }  
 	};
   const getRandomName = function() {
@@ -473,7 +434,7 @@ const tetrisFactory = (function(unit) {
     produce: produce,
     getRandomName: getRandomName
 	};
-})(view.config.modularUnit);
+})();
 
 
 // --------------------------------------------------------
@@ -495,17 +456,15 @@ const game = (function() {
   let fallingRate = 1000;
 
   const nextTetris = (function() {
-    const canvas = view.smallCanvas;
-    const ctx = view.smallCanvas.ctx;
+    const canvas = view.smallCanvas;  
     const names = []; // populated by 3 possible Tetris types names; first from the array is assigned to fallingTetris;   
-    const startPoints = view.config.smallCanvas.startPoints;
+    const startPoints = canvas.config.startPoints;
 
     const generateNames = function() {
       startPoints.forEach((point) => names.push(tetrisFactory.getRandomName()))
-      // console.log(names);
     }();
     function createTetris() {
-      let tetrisArray = []; 
+      let tetrisArray = [];
       startPoints.forEach((point, index) => {
         tetrisArray.push(tetrisFactory.produce(names[ index ], canvas, point));
       });
@@ -517,13 +476,9 @@ const game = (function() {
       render();
       return firstName;
     };
-    function clear() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-    };
     function render() {
-      clear();
-      createTetris().forEach((tetris) => tetris.drawFill("pink"));
-      console.log("Small canvas rendered")
+      canvas.clear();
+      createTetris().forEach(tetris => tetris.drawFill());
     };
     return {
       render: render,
@@ -532,22 +487,24 @@ const game = (function() {
 
   })();
 
-  const fallingTetris = (function(canvas, startPoint) {
-    const getName = nextTetris.getFirstName;
+  const fallingTetris = (function() {
+    const canvas = largeCanvas;
+    const nameOfFirst = nextTetris.getFirstName();
+    const startPoint = canvas.config.startPoints[0];
     let currentInstance;
 
+    const placeOnStart = function() {
+      currentInstance = tetrisFactory.produce(nameOfFirst, canvas, startPoint);
+      currentInstance.drawFill('grey');
+    };
     const getInstance = function() {
       return currentInstance;
-    };
-    const placeOnStart = function() {
-      currentInstance = tetrisFactory.produce(getName(), canvas, startPoint);
-      currentInstance.drawFill('grey');
     };
     return {
       placeOnStart: placeOnStart,
       getInstance: getInstance,
     };
-  })(view.largeCanvas, view.config.largeCanvas.startPoints[0]);
+  })();
 
   function addIntervals() {
     clockInterval = setInterval(clockTicking, 1000);
@@ -562,6 +519,7 @@ const game = (function() {
     console.log("tetris wil be falling");
   };
   function fallDown() {
+    largeCanvas.clear();
     fallingTetris.getInstance().moveDown();
   };
 
@@ -627,6 +585,8 @@ const game = (function() {
   //   a: (function() { activeShape.rotate(90) }),
     }
     Object.keys(listenedKeys).forEach((name) => {if(event.key === name) { listenedKeys[name]() } });
+    largeCanvas.clear();
+    targetObject.drawFill();
   };
   function addKeyControls(obj) {
     window.addEventListener('keydown', keydownHandler.bind(obj))
