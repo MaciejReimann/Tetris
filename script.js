@@ -137,20 +137,33 @@ const timer = (function () {
   }
 })();
 
-// ----- HELPER FUNCTIONS ------
+// ----- VERTEX TRANSFORMATION FUNCTIONS ------
 
 function getRandomItem(array) {
   return array[ Math.floor(Math.random() * array.length) ];
 };
 
 function translateToGlobal(localZero, localVertices, mod) { // localZero in global units, localVertices in local units, mod - the size of the local unit
+  if(!mod) { mod = 1 }; // mod will not affect the return values;
   if(localVertices instanceof Array) {
     return localVertices.map( (localVertex) => translateToGlobal(localZero, localVertex, mod) );
-   } else {
+  } else {
     let localVertex = localVertices;
     return { // vertex in global units
       x: localZero.x + localVertex.x * mod,
       y: localZero.y + localVertex.y * mod 
+    };
+  };
+};
+
+function translateToLocal(localZero, globalVertices) {
+  if(globalVertices instanceof Array) {
+    return globalVertices.map( (globalVertex) => translateToLocal(localZero, globalVertex) );
+  } else {
+    let globalVertex = globalVertices;
+    return {
+      x: globalVertex.x - localZero.x,
+      y: globalVertex.y - localZero.y
     };
   };
 };
@@ -180,6 +193,37 @@ function translateToPolar(vertices) {
   };
 };
 
+function rotatePolar(polarVertices, angle) {
+  if(polarVertices instanceof Array) {
+    return polarVertices.map( (polarVertex) => rotatePolar(polarVertex, angle) );
+  } else {
+    let polarVertex = polarVertices;
+    return {
+      r: polarVertex.r,
+      angle: polarVertex.angle + angle
+    };
+  };
+};
+
+function rotateCartesian(localVertices, angle) { // if rotate localVertices, pivot is in 0,0; if rotateGlobal pivot needs to be set; pivot = localZero
+  if(localVertices instanceof Array) {
+    return localVertices.map( (localVertex) => rotateCartesian(localVertex, angle));
+  } else {
+    let localVertex = localVertices;
+    let cartesian = translateToCartesian( 
+      rotatePolar( 
+        translateToPolar(localVertex), 
+      angle) 
+    );
+    return cartesian  
+  };
+};
+
+// let a = {x: 100, y: 100};
+// let b = {x: 50, y: 50};
+// let arr = [a,b];
+// console.log( rotateCartesian(arr, 180) )
+
 function mirrorByY_Axis(vertices) {
   if(vertices instanceof Array) {
     return vertices.map( (vertex) => mirrorByY_Axis(vertex) );
@@ -191,29 +235,6 @@ function mirrorByY_Axis(vertices) {
     };
   };
 };
-
-
-
-
-
-
-// function rotatePolar(polarVerticesArray, angle) {
-//   let rotatedCenters = [];
-//   polarVerticesArray.forEach((vertex) => {
-//     let rotatedCenter = {};
-//     vertex.angle = vertex.angle + angle;
-//     vertex = {
-//       r: vertex.r,
-//       angle: vertex.angle
-//     }
-//     rotatedCenters.push(vertex);
-//   })
-//   return rotatedCenters;
-// }
-
-// //------------------------------------------------------
-
-
 
 //   Tetris.prototype.setGlobalCenters = function(arrayOfGlobalVertices) {
 //     this.squares.forEach((square, index) => {
