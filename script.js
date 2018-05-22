@@ -378,12 +378,12 @@ const tetrisFactory = (function() {
     this.angle = 0;
     this.squares = []; // to be populated by the Square instances
   };
-  Tetris.prototype.getGlobalCenters = function() {
+  Tetris.prototype.getGlobalSquareCenters = function() {
     return translateToGlobal(this.pivot, this.squareCenters, this.mod);
   };
   Tetris.prototype.createSquares = function() { // creates Square instances for each squareCenter in the squares array;
     if (this.squares.length === 0 ) { // if already created do nothing
-      this.getGlobalCenters().forEach((point) => { // needs to get the list of center point in global units
+      this.getGlobalSquareCenters().forEach((point) => { // needs to get the list of center point in global units
         this.squares.push(new Square(point));
       });
     };
@@ -414,6 +414,20 @@ const tetrisFactory = (function() {
     this.squares.forEach((square) => square.moveLeft());
     // this.drawFill();
   }
+  Tetris.prototype.rotate = function(angle) {
+    rotateCartesian( localVertices, angle )
+    // this.globalSquareCenters = this.getGlobalSquareCenters();
+    // let globalSquareCentersRotated = this.globalSquareCenters;
+  }
+  //   Tetris.prototype.rotate = function(angle) {
+//   this.angle += angle;
+//   let centersPolarToPivot = this.getPolarCenters();
+//   let rotatedCentersPolar = rotatePolar(centersPolarToPivot, this.angle);
+//   let rotatedCentersCartesian = translateToCartesian(rotatedCentersPolar);
+//   this.squareCenters = rotatedCentersCartesian;
+//   let rotatedCentersGlobal = this.getGlobalCenters();
+//   let newCenters = this.setGlobalCenters(rotatedCentersGlobal);
+//   console.log( newCenters )
 
   // -------- FACTORY INTERFACE ---------
 
@@ -588,19 +602,23 @@ const game = (function() {
       start();
     }
   };  
-  const keydownHandler = function() {
+  const keydownHandler = function(event) {
     let targetObject = this;
     if (!targetObject) {
       throw new Error('No keydown target set!')   
     };
     const listenedKeys = {
-      ArrowDown: targetObject.moveDown.bind(targetObject),
-      ArrowRight: targetObject.moveRight.bind(targetObject),
-      ArrowLeft: targetObject.moveLeft.bind(targetObject),
+      ArrowDown: "moveDown",
+      ArrowRight: "moveRight",
+      ArrowLeft: "moveLeft",
   //   z: (function() { activeShape.rotate(-90) }),
   //   a: (function() { activeShape.rotate(90) }),
     }
-    Object.keys(listenedKeys).forEach((name) => {if(event.key === name) { listenedKeys[name]() } });
+    Object.keys(listenedKeys).forEach( (name) => {
+      if(event.key === name) {
+        targetObject[ listenedKeys[name] ] ();
+      };
+    });
     largeCanvas.render();
   };
   function addKeyControls(obj) {
