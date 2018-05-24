@@ -139,6 +139,18 @@ const timer = (function () {
 
 // ----- VERTEX TRANSFORMATION FUNCTIONS ------
 
+const size = view.canvasConfig.modularUnit;
+console.log(size)
+
+const centerOfCanvas = {x:200, y: 225}
+const sqr = new Square(size, centerOfCanvas, 45)
+const poly = new RegularPolygon(4, 20, centerOfCanvas, 45);
+poly.drawOutline(view.largeCanvas.ctx);
+sqr.drawOutline(view.largeCanvas.ctx);
+
+console.log ( poly )
+
+
 function getRandomItem(array) {
   return array[ Math.floor(Math.random() * array.length) ];
 };
@@ -170,7 +182,7 @@ function translateToLocal(localZero, globalVertices) {
 
 function translateToCartesian(vertices) {
 if(vertices instanceof Array) {
-    return vertices.map( (vertex) => translateToPolar(vertex) );
+    return vertices.map( (vertex) => translateToCartesian(vertex) );
   } else { // TODO: Add argument validation - check if vertices has r and angle property and their value is number, else throw an Error;  
     let vertex = vertices;
     let n = 0; // optional angle parameter    
@@ -209,6 +221,7 @@ function rotateCartesian(localVertices, angle) { // if rotate localVertices, piv
   if(localVertices instanceof Array) {
     return localVertices.map( (localVertex) => rotateCartesian(localVertex, angle));
   } else {
+    console.log(angle)
     let localVertex = localVertices;
     let cartesian = translateToCartesian( 
       rotatePolar( 
@@ -295,15 +308,18 @@ const tetrisFactory = (function() {
   
   // --=-- BASIC MODULAR UNIT CONSTRUCTOR -----
 
-  function Square(point) { // point = {x: x, y: y}; in global units
+  function Square(center) { // center = {x: x, y: y}; in global units
     this.mod = modularUnit;
-    this.center = point;
+    this.center = center;
     this.length = this.mod;
     this.color = defaultColor;
     this.vertices = []; // empty array to be populated with 4 vertices calculated on each tranformation;
   }
   Square.prototype.setNewCenter = function(point) { // takes point = {x: x, y: y}; in global coordinates
     this.center = point;
+  };
+  Square.prototype.setVertices = function(array) {
+    this.vertices = array;
   };
   Square.prototype.getVertices = function() {
     return this.vertices = [
@@ -414,8 +430,40 @@ const tetrisFactory = (function() {
     this.squares.forEach((square) => square.moveLeft());
     // this.drawFill();
   }
-  Tetris.prototype.rotate = function(angle) {
-    rotateCartesian( localVertices, angle )
+  Tetris.prototype.rotateLeft = function() {
+    // this.squares = [];
+    // this.angle += -45;
+    console.log(this.angle)
+    console.log("rotating left");
+
+    let squareCorners = this.squares.map((square) => square.getVertices() );
+    console.log( squareCorners ); 
+
+    // console.log(this.squareCenters)
+    // this.squareCenters = rotateCartesian( this.squareCenters, 1 );
+
+    //  let cartesian = translateToCartesian( 
+    //   rotatePolar( 
+    //     translateToPolar(localVertex), 
+    //   angle) 
+    // );
+
+     let polar = translateToPolar(this.squareCenters);
+     console.log(polar)
+     let rotated = rotatePolar(polar, -45);
+     console.log(rotated)
+     let cartesian = translateToCartesian( rotated );
+     console.log( cartesian );
+     this.squareCenters = cartesian;
+     this.angle = 0;
+
+    // this.squareCenters = rotateCartesian( this.squareCenters, -90 );
+    // this.globalSquareCenters = this.getGlobalSquareCenters();
+    // let globalSquareCentersRotated = this.globalSquareCenters;
+  }
+  Tetris.prototype.rotateRight = function(angle) {
+    console.log("rotating right")
+    // rotateCartesian( localVertices, angle )
     // this.globalSquareCenters = this.getGlobalSquareCenters();
     // let globalSquareCentersRotated = this.globalSquareCenters;
   }
@@ -534,7 +582,6 @@ const game = (function() {
   };
   function clockTicking() {
     timer.renderIncremented();
-    console.log("tetris wil be falling");
   };
   function fallDown() {
     fallingTetris.getInstance().moveDown();
@@ -611,8 +658,8 @@ const game = (function() {
       ArrowDown: "moveDown",
       ArrowRight: "moveRight",
       ArrowLeft: "moveLeft",
-  //   z: (function() { activeShape.rotate(-90) }),
-  //   a: (function() { activeShape.rotate(90) }),
+      z: "rotateLeft",
+      a: "rotateRight",
     }
     Object.keys(listenedKeys).forEach( (name) => {
       if(event.key === name) {
