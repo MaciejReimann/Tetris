@@ -200,7 +200,7 @@ function translateToPolar(vertices) {
     let vertex = vertices;
     return {
       r: Math.sqrt(vertex.x * vertex.x + vertex.y * vertex.y),
-      angle: Math.atan2(vertex.x, vertex.y) * (180 / Math.PI),
+      angle: Math.atan2(vertex.y, vertex.x) * (180 / Math.PI),
     };
   };
 };
@@ -314,59 +314,25 @@ const tetrisFactory = (function() {
 
   Tetris.prototype.moveRight = function() {
     this.pivot.x += this.mod;
-  }
+  };
   Tetris.prototype.moveDown = function() {
     this.pivot.y += this.mod;
-  }
+  };
   Tetris.prototype.moveLeft = function() {
     this.pivot.x -= this.mod;
-  }
+  };
   Tetris.prototype.rotateLeft = function() {
-    // this.squares = [];
-    // this.angle += -45;
-    console.log(this.angle)
-    console.log("rotating left");
-
-    let squareCorners = this.squares.map((square) => square.getCartesianVertices() );
-    console.log( squareCorners ); 
-
-    // console.log(this.squareCenters)
-    // this.squareCenters = rotateCartesian( this.squareCenters, 1 );
-
-    //  let cartesian = translateToCartesian( 
-    //   rotatePolar( 
-    //     translateToPolar(localVertex), 
-    //   angle) 
-    // );
-
-     let polar = translateToPolar(this.squareCenters);
-     console.log(polar)
-     let rotated = rotatePolar(polar, -45);
-     console.log(rotated)
-     let cartesian = translateToCartesian( rotated );
-     console.log( cartesian );
-     this.squareCenters = cartesian;
-     this.angle = 0;
-
-    // this.squareCenters = rotateCartesian( this.squareCenters, -90 );
-    // this.globalSquareCenters = this.getGlobalSquareCenters();
-    // let globalSquareCentersRotated = this.globalSquareCenters;
-  }
-  Tetris.prototype.rotateRight = function(angle) {
-    console.log("rotating right")
-    // rotateCartesian( localVertices, angle )
-    // this.globalSquareCenters = this.getGlobalSquareCenters();
-    // let globalSquareCentersRotated = this.globalSquareCenters;
-  }
-  //   Tetris.prototype.rotate = function(angle) {
-//   this.angle += angle;
-//   let centersPolarToPivot = this.getPolarCenters();
-//   let rotatedCentersPolar = rotatePolar(centersPolarToPivot, this.angle);
-//   let rotatedCentersCartesian = translateToCartesian(rotatedCentersPolar);
-//   this.squareCenters = rotatedCentersCartesian;
-//   let rotatedCentersGlobal = this.getGlobalCenters();
-//   let newCenters = this.setGlobalCenters(rotatedCentersGlobal);
-//   console.log( newCenters )
+    let rotation = -90;
+    this.squareCenters = translateToCartesian( 
+      rotatePolar( translateToPolar(this.squareCenters), rotation ) );
+    this.angle = this.angle % 360 + rotation;
+  };
+  Tetris.prototype.rotateRight = function() {
+    let rotation = 90;
+    this.squareCenters = translateToCartesian( 
+      rotatePolar( translateToPolar(this.squareCenters), rotation ) );
+    this.angle = this.angle % 360 + rotation;
+  };
 
   // -------- FACTORY INTERFACE ---------
 
@@ -390,13 +356,11 @@ const tetrisFactory = (function() {
 	};
 })();
 
-
 // --------------------------------------------------------
 // --------------------------------------------------------
 // ------------------- GAME OBJECT  -----------------------
 // --------------------------------------------------------
 // --------------------------------------------------------
-
 
 const game = (function() {
   const showMessage = view.showMessage;
