@@ -232,11 +232,6 @@ function rotateCartesian(localVertices, angle) { // if rotate localVertices, piv
   };
 };
 
-// let a = {x: 100, y: 100};
-// let b = {x: 50, y: 50};
-// let arr = [a,b];
-// console.log( rotateCartesian(arr, 180) )
-
 function mirrorByY_Axis(vertices) {
   if(vertices instanceof Array) {
     return vertices.map( (vertex) => mirrorByY_Axis(vertex) );
@@ -248,51 +243,6 @@ function mirrorByY_Axis(vertices) {
     };
   };
 };
-
-//   Tetris.prototype.setGlobalCenters = function(arrayOfGlobalVertices) {
-//     this.squares.forEach((square, index) => {
-//       let newCenter = arrayOfGlobalVertices[index];
-//       square.setNewCenter(newCenter);
-//     })
-//     return this.squares;
-//   }
-//   Tetris.prototype.getLocalCenters = function() {
-//     return this.squareCenters;
-//   }
-//   Tetris.prototype.getGlobalCenters = function() {
-//     let globalCenters = []
-//     this.squareCenters.forEach(function(center) {
-//       globalCenters.push(translateVerticesToGlobal(this.pivot, this.mod, center.x, center.y));
-//     }.bind(this) ); 
-//     return globalCenters;
-//   }
-//   Tetris.prototype.getPolarCenters = function() {
-//     return translateToPolar(this.getLocalCenters());
-//   }
-
-
-//   // -------------------------------------------
-//   // --------- TETRIS TRANSFORMATIONS ----------
-
-
-//   Tetris.prototype.rotate = function(angle) {
-//   this.angle += angle;
-//   let centersPolarToPivot = this.getPolarCenters();
-//   let rotatedCentersPolar = rotatePolar(centersPolarToPivot, this.angle);
-//   let rotatedCentersCartesian = translateToCartesian(rotatedCentersPolar);
-//   this.squareCenters = rotatedCentersCartesian;
-//   let rotatedCentersGlobal = this.getGlobalCenters();
-//   let newCenters = this.setGlobalCenters(rotatedCentersGlobal);
-//   console.log( newCenters )
-
-//   // this.vertices = translateToCartesian(rotated);
-//   this.angle = 0;
-//   this.drawFill();
-//   }
-
-
-
-
 
 // --------------------------------------------------------
 // --------------------------------------------------------
@@ -306,54 +256,6 @@ const tetrisFactory = (function() {
   const defaultColor = 'blue';
   // const possibleShapes = ['square-type', 's-type', 'z-type', 'i-type', 'l-type', 'l-type-mirrored'];
   
-  // --=-- BASIC MODULAR UNIT CONSTRUCTOR -----
-
-  function Square(center) { // center = {x: x, y: y}; in global units
-    this.mod = modularUnit;
-    this.center = center;
-    this.length = this.mod;
-    this.color = defaultColor;
-    this.vertices = []; // empty array to be populated with 4 vertices calculated on each tranformation;
-  }
-  Square.prototype.setNewCenter = function(point) { // takes point = {x: x, y: y}; in global coordinates
-    this.center = point;
-  };
-  Square.prototype.setVertices = function(array) {
-    this.vertices = array;
-  };
-  Square.prototype.getVertices = function() {
-    return this.vertices = [
-        {x: this.center.x - this.length / 2, y: this.center.y - this.length / 2},
-        {x: this.center.x + this.length / 2, y: this.center.y - this.length / 2},
-        {x: this.center.x + this.length / 2, y: this.center.y + this.length / 2},
-        {x: this.center.x - this.length / 2, y: this.center.y + this.length / 2},
-    ]
-  };
-  Square.prototype.drawOutline = function(context) {
-    this.ctx = context;
-    const vertices = this.getVertices(); // calculate the vertices for the path
-    this.ctx.beginPath();
-    this.ctx.moveTo(vertices[0].x, vertices[0].y);
-    this.ctx.lineTo(vertices[1].x, vertices[1].y);
-    this.ctx.lineTo(vertices[2].x, vertices[2].y);
-    this.ctx.lineTo(vertices[3].x, vertices[3].y);
-    this.ctx.closePath();
-    this.ctx.stroke(); // line width to be defined in the config object
-  };
-  Square.prototype.drawFill = function(context, color) {
-    this.drawOutline(context);
-    this.ctx.fillStyle = color || this.color;
-    this.ctx.fill();
-  };
-  Square.prototype.moveRight = function() { // moves the center right
-    this.center.x += this.mod;
-  };
-  Square.prototype.moveDown = function() { // moves the center left
-    this.center.y += this.mod;
-  };
-  Square.prototype.moveLeft = function() { // moves the center down
-    this.center.x -= this.mod;
-  };
   // --- POSSIBLE TETRIS SHAPES CONSTRUCTORS ---
 
   function Tetris_Square(pivot) {
@@ -392,43 +294,32 @@ const tetrisFactory = (function() {
     this.mod = modularUnit;
     this.pivot = pivot; 
     this.angle = 0;
-    this.squares = []; // to be populated by the Square instances
   };
   Tetris.prototype.getGlobalSquareCenters = function() {
     return translateToGlobal(this.pivot, this.squareCenters, this.mod);
   };
-  Tetris.prototype.createSquares = function() { // creates Square instances for each squareCenter in the squares array;
-    if (this.squares.length === 0 ) { // if already created do nothing
-      this.getGlobalSquareCenters().forEach((point) => { // needs to get the list of center point in global units
-        this.squares.push(new Square(point));
-      });
-    };
+  Tetris.prototype.createSquares = function() {
+    return this.getGlobalSquareCenters().map( 
+      (point) => new Square(this.mod, point, 45) 
+      );
   };
   Tetris.prototype.drawOutline = function() {
-    this.createSquares();
-    this.squares.forEach((square) => {square.drawOutline()});
+    this.createSquares().forEach((square) => {square.drawOutline(context, color)});
   };
-  Tetris.prototype.drawFill = function(context, color) { // !!!
-    this.createSquares();
-    this.squares.forEach((square) => square.drawFill(context, color));
+  Tetris.prototype.drawFill = function(context, color) {
+    this.createSquares().forEach((square) => square.drawFill(context, color));
   };
 
   // --------- TETRIS TRANSFORMATIONS ----------
 
   Tetris.prototype.moveRight = function() {
     this.pivot.x += this.mod;
-    this.squares.forEach((square) => square.moveRight());
-    // this.drawFill();
   }
   Tetris.prototype.moveDown = function() {
     this.pivot.y += this.mod;
-    this.squares.forEach((square) => square.moveDown());
-    // this.drawFill();
   }
   Tetris.prototype.moveLeft = function() {
     this.pivot.x -= this.mod;
-    this.squares.forEach((square) => square.moveLeft());
-    // this.drawFill();
   }
   Tetris.prototype.rotateLeft = function() {
     // this.squares = [];
@@ -436,7 +327,7 @@ const tetrisFactory = (function() {
     console.log(this.angle)
     console.log("rotating left");
 
-    let squareCorners = this.squares.map((square) => square.getVertices() );
+    let squareCorners = this.squares.map((square) => square.getCartesianVertices() );
     console.log( squareCorners ); 
 
     // console.log(this.squareCenters)
