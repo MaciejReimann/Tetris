@@ -23,9 +23,30 @@ RegularPolygon.prototype.getCartesianVertices = function() {
   };
   return verticesArray;
 };
+RegularPolygon.prototype.move = function(n, m) {
+  if(!n) {
+    n = 0;
+  };
+  if(!m) {
+    m = 0;
+  };
+  this.center.x += n;
+  this.center.y += m;
+};
+RegularPolygon.prototype.rotate = function(angle) {
+  if(!angle) {
+    angle = 0;
+  };
+  this.angle += angle;
+};
+
 RegularPolygon.prototype.drawOutline = function(context, color) {
-    let vertices = this.getCartesianVertices();
+  if(context) {
     this.ctx = context;
+  } else if (!this.ctx) {
+    throw new Error("No context defined!")
+  }
+    let vertices = this.getCartesianVertices();
     this.ctx.beginPath();
     this.ctx.moveTo(vertices[0].x, vertices[0].y);
     for (let i = 1; i < this.numberOfSides; i ++ ) {
