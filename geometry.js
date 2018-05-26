@@ -1,3 +1,9 @@
+
+const Shape = function() {
+
+}
+
+
 const RegularPolygon = function(n, r, center, angle) {
   if(!n || !r) { throw new Error("Number of sides and radius must be specified") };
   if(!angle) { angle = 0 };
@@ -6,7 +12,7 @@ const RegularPolygon = function(n, r, center, angle) {
   this.radius = r;
   this.center = center;
   this.angle = angle;
-  // this.cartesianVertices = this.getVertices();
+  this.defaultColor = 'darkgrey';
 }
 RegularPolygon.prototype.getCartesianVertices = function() {
   let verticesArray = [];
@@ -23,37 +29,33 @@ RegularPolygon.prototype.getCartesianVertices = function() {
   };
   return verticesArray;
 };
-RegularPolygon.prototype.move = function(n, m) {
-  if(!n) {
-    n = 0;
-  };
-  if(!m) {
-    m = 0;
-  };
-  this.center.x += n;
-  this.center.y += m;
-};
-RegularPolygon.prototype.rotate = function(angle) {
-  if(!angle) {
-    angle = 0;
-  };
-  this.angle += angle;
-};
 
-RegularPolygon.prototype.drawOutline = function(context, color) {
+RegularPolygon.prototype.drawOutline = function(context, outlineColor) {
+  this.outlineColor = outlineColor;
   if(context) {
     this.ctx = context;
-  } else if (!this.ctx) {
+  } else {
+    throw new Error("No context defined!");
+  }
+  let vertices = this.getCartesianVertices();
+  this.ctx.beginPath();
+  this.ctx.moveTo(vertices[0].x, vertices[0].y);
+  for (let i = 1; i < this.numberOfSides; i ++ ) {
+    this.ctx.lineTo(vertices[i].x, vertices[i].y);
+  };
+  this.ctx.closePath();
+  this.ctx.stroke(); // line width to be defined in the config object
+};
+RegularPolygon.prototype.drawFill = function(context, fillColor, outlineColor) {
+  this.fillColor = fillColor;
+  if(context) {
+    this.ctx = context;
+  } else {
     throw new Error("No context defined!")
   }
-    let vertices = this.getCartesianVertices();
-    this.ctx.beginPath();
-    this.ctx.moveTo(vertices[0].x, vertices[0].y);
-    for (let i = 1; i < this.numberOfSides; i ++ ) {
-      this.ctx.lineTo(vertices[i].x, vertices[i].y);
-    };
-    this.ctx.closePath();
-    this.ctx.stroke(); // line width to be defined in the config object
+  this.drawOutline(context, outlineColor);
+  this.ctx.fillStyle = this.fillColor || this.defaultColor;
+  this.ctx.fill();
 };
 
 const Square = function(sideLength, center, angle) {
