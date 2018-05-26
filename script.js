@@ -140,15 +140,12 @@ const timer = (function () {
 // ----- VERTEX TRANSFORMATION FUNCTIONS ------
 
 const size = view.canvasConfig.modularUnit;
-console.log(size)
-
 const centerOfCanvas = {x:200, y: 225}
 const sqr = new Square(size, centerOfCanvas, 45)
 const poly = new RegularPolygon(4, 20, centerOfCanvas, 45);
 poly.drawOutline(view.largeCanvas.ctx);
 sqr.drawOutline(view.largeCanvas.ctx);
 
-console.log ( poly )
 
 
 function getRandomItem(array) {
@@ -300,32 +297,52 @@ const tetrisFactory = (function() {
   };
   Tetris.prototype.createSquares = function() {
     return this.getGlobalSquareCenters().map( 
-      (point) => new Square(this.mod, point, 45) 
+      (point) => new Square(this.mod, point, this.angle + 45) 
       );
   };
-  Tetris.prototype.drawOutline = function() {
-    this.createSquares().forEach((square) => {square.drawOutline(context, color)});
+  Tetris.prototype.drawFill = function(canvas, color) { // this function is called as Canvas method, where canvas.ctx is passed;
+    this.canvas = canvas;
+    this.createSquares().forEach((square) => square.drawFill(this.canvas));
   };
-  Tetris.prototype.drawFill = function(context, color) {
-    this.createSquares().forEach((square) => square.drawFill(context, color));
+  Tetris.prototype.setRectangularRange = function(range) {
+    // console.log(this.canvas)
+    // if(!range) {
+    //   this.range = {
+    //     left: 0,
+    //     right: this.ctx.canvas.width, HOW IS THE CANVAS PASSED TO TETRIS???? THERE IS A MESS
+    //     down: this.canvas.height
+    //   }
+    // };
+  };
+  Tetris.prototype.isWithinRange = function() {
+    this.setRectangularRange();
+
+    return true;
   };
 
   // --------- TETRIS TRANSFORMATIONS ----------
 
   Tetris.prototype.moveRight = function() {
-    this.pivot.x += this.mod;
+    if(this.isWithinRange()) {
+      this.pivot.x += this.mod;
+    }
   };
   Tetris.prototype.moveDown = function() {
-    this.pivot.y += this.mod;
+    if(this.isWithinRange()) {
+      this.pivot.y += this.mod;
+    }
   };
   Tetris.prototype.moveLeft = function() {
-    this.pivot.x -= this.mod;
+    if(this.isWithinRange()) {
+      this.pivot.x -= this.mod;
+    }
   };
   Tetris.prototype.rotateLeft = function() {
     let rotation = -90;
     this.squareCenters = translateToCartesian( 
       rotatePolar( translateToPolar(this.squareCenters), rotation ) );
     this.angle = this.angle % 360 + rotation;
+
   };
   Tetris.prototype.rotateRight = function() {
     let rotation = 90;
@@ -336,9 +353,7 @@ const tetrisFactory = (function() {
 
   // -------- FACTORY INTERFACE ---------
 
-	const produce = function(type, canvas, point) { // type(string), canvas(DOMElement), startPoint - all obligatory
-    ctx = canvas.ctx; // Tetris method use this closure; ctx is not defined in tetris constructor;
-    
+	const produce = function(type, point) { // type(string), startPoint - all obligatory
     if (type === 'square-type') {
         return new Tetris_Square( point );
     } else if (type === 's-type') {
@@ -385,7 +400,7 @@ const game = (function() {
 
     const placeOnStart = function() {
       currentInstances = startPoints.map( 
-        (point, i = point[index] ) => tetrisFactory.produce(names[ i ], smallCanvas, point) 
+        (point, i = point[index] ) => tetrisFactory.produce(names[ i ], point) 
       );
       return currentInstances;
     };
@@ -415,7 +430,7 @@ const game = (function() {
     let currentInstance;
 
     const placeOnStart = function() {
-      currentInstance = tetrisFactory.produce(nameOfFirst(), largeCanvas, startPoint);
+      currentInstance = tetrisFactory.produce(nameOfFirst(), startPoint);
       return currentInstance;
     };
     const getInstance = function() {
