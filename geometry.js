@@ -14,18 +14,27 @@ const RegularPolygon = function(n, r, center, angle) {
   this.angle = angle;
   this.defaultColor = 'darkgrey';
 }
-RegularPolygon.prototype.getCartesianVertices = function() {
+RegularPolygon.prototype.getCartesianVertices = function(axis) {
   let verticesArray = [];
+  let xVertices = [];
+  let yVertices = [];
   for (let i = 0; i < this.numberOfSides; i ++ ) {    
     let vertex = translateToCartesian(
       {
         r: this.radius,
         angle: 360 / this.numberOfSides * i + this.angle
       }
-    )
-    vertex.x += this.center.x;
-    vertex.y += this.center.y;
-    verticesArray.push(vertex)
+    );
+    vertex.x = Math.round(vertex.x + this.center.x);
+    vertex.y = Math.round(vertex.y + this.center.y);
+    verticesArray.push(vertex);
+    xVertices.push(vertex.x);
+    yVertices.push(vertex.y);
+  };
+  if(axis === 'x') {
+    return xVertices;
+  } else if (axis === 'y') {
+    return yVertices;
   };
   return verticesArray;
 };
