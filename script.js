@@ -94,7 +94,7 @@ Canvas.prototype.updateContent = function(shapes) {
 };
 Canvas.prototype.renderContent = function(shape) {
   this.shapes.forEach((shape) => {
-    shape.drawFill(this.ctx);
+    shape.drawFill(this); // passes canvas object reference to Tetris
   });
 }
 
@@ -241,6 +241,16 @@ function mirrorByY_Axis(vertices) {
   };
 };
 
+
+function isNotGreaterThen(numbers, end) {
+  if(numbers instanceof Array) {
+   return numbers.every( (number) => isNotGreaterThen(number, end) );
+  } else {
+    let number = numbers;
+    return number <= end;
+  };
+};
+
 // --------------------------------------------------------
 // --------------------------------------------------------
 // ----------------- TETRIS FACTORY  ----------------------
@@ -300,42 +310,61 @@ const tetrisFactory = (function() {
       (point) => new Square(this.mod, point, this.angle + 45) 
       );
   };
-  Tetris.prototype.drawFill = function(canvas, color) { // this function is called as Canvas method, where canvas.ctx is passed;
+  Tetris.prototype.drawFill = function(canvas) { // this function is called as Canvas method, where canvas.ctx is passed;
     this.canvas = canvas;
-    this.createSquares().forEach((square) => square.drawFill(this.canvas));
+    this.createSquares().forEach((square) => square.drawFill(this.canvas.ctx));
   };
   Tetris.prototype.setRectangularRange = function(range) {
-    // console.log(this.canvas)
-    // if(!range) {
-    //   this.range = {
-    //     left: 0,
-    //     right: this.ctx.canvas.width, HOW IS THE CANVAS PASSED TO TETRIS???? THERE IS A MESS
-    //     down: this.canvas.height
-    //   }
-    // };
+    if(!range) {
+      this.range = {
+        left: 0,
+        up: -10,
+        right: this.canvas.canvas.width, 
+        down: this.canvas.canvas.height
+      }
+    };
   };
-  Tetris.prototype.isWithinRange = function() {
+  Tetris.prototype.canMove = function() {
     this.setRectangularRange();
+    let xVertices = this.createSquares().map( (square)  => square.getCartesianVertices('x'));
+    let yVertices = this.createSquares().map( (square)  => square.getCartesianVertices('y'));
+    const down = function() {
+      return isNotGreaterThen(yVertices, this.range.down);
+    }.bind(this);
+    return {
+      down: down,
+    };
+  }
 
-    return true;
-  };
+  // Tetris.prototype.isWithinRange = function() {
+  //   this.setRectangularRange();
+  //   let xVertices = this.createSquares().map( (square)  => square.getCartesianVertices('x'));
+  //   let yVertices = this.createSquares().map( (square)  => square.getCartesianVertices('y'));
+  //   // console.log(isWithinRange(yVertices, this.range.up, this.range.down) )
+  //   if( isWithinRange(xVertices, this.range.left, this.range.right) &&
+  //     isWithinRange(yVertices, this.range.up, this.range.down) 
+  //     ) {
+  //       return true
+  //     }
+  //   return false;
+  // };
 
   // --------- TETRIS TRANSFORMATIONS ----------
 
   Tetris.prototype.moveRight = function() {
-    if(this.isWithinRange()) {
+    // if(this.isWithinRange()) {
       this.pivot.x += this.mod;
-    }
+    // }
   };
   Tetris.prototype.moveDown = function() {
-    if(this.isWithinRange()) {
+    if( this.canMove().down() ) {
       this.pivot.y += this.mod;
     }
   };
   Tetris.prototype.moveLeft = function() {
-    if(this.isWithinRange()) {
+    // if(this.isWithinRange()) {
       this.pivot.x -= this.mod;
-    }
+    // }
   };
   Tetris.prototype.rotateLeft = function() {
     let rotation = -90;
@@ -430,7 +459,10 @@ const game = (function() {
     let currentInstance;
 
     const placeOnStart = function() {
+
       currentInstance = tetrisFactory.produce(nameOfFirst(), startPoint);
+      // if (currentInstance.getCartesianVertices())
+      // console.log( currentInstance.createSquares().map(square => square.getCartesianVertices() ))
       return currentInstance;
     };
     const getInstance = function() {
