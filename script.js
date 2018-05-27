@@ -160,8 +160,8 @@ const tetrisFactory = (function() {
   
   // --- POSSIBLE TETRIS SHAPES CONSTRUCTORS ---
 
-  function Tetris_Square(pivot) {
-    Tetris.call(this, pivot);
+  function Tetris_Square(pivot, eventCallback) {
+    Tetris.call(this, pivot, eventCallback);
     this.name = 'square-type';
     this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot
       {x: -0.5, y: 0.5}, {x: -0.5, y: -0.5}, {x: 0.5, y: -0.5}, {x: 0.5, y: 0.5}
@@ -170,8 +170,8 @@ const tetrisFactory = (function() {
   Tetris_Square.prototype = Object.create(Tetris.prototype);
   Tetris_Square.prototype.constructor = Tetris_Square;
     
-  function Tetris_S(pivot) {
-    Tetris.call(this, pivot);
+  function Tetris_S(pivot, eventCallback) {
+    Tetris.call(this, pivot, eventCallback);
     this.name = 's-type';
     this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot in local units
       {x: -1, y: 0.5}, {x: 0, y: 0.5}, {x: 0, y: -0.5}, {x: 1, y: -0.5}
@@ -180,8 +180,8 @@ const tetrisFactory = (function() {
   Tetris_S.prototype = Object.create(Tetris.prototype);
   Tetris_S.prototype.constructor = Tetris_S;
 
-  function Tetris_Z(pivot) {
-    Tetris.call(this, pivot);
+  function Tetris_Z(pivot, eventCallback) {
+    Tetris.call(this, pivot, eventCallback);
     Tetris_S.call(this, pivot);
     this.name = 'z-type';
     this.squareCenters = mirrorByY_Axis(this.squareCenters);
@@ -192,10 +192,12 @@ const tetrisFactory = (function() {
 
   // --------- MAIN TETRIS CONSTRUCTOR ---------
 
-  function Tetris(pivot) { // pivot = { x: x, y: y} in global units
+  function Tetris(pivot, eventCallback) { // pivot = { x: x, y: y} in global units
     this.mod = modularUnit;
     this.pivot = pivot; 
     this.angle = 0;
+    this.status = [];
+    this.eventCallback = eventCallback;
   };
   Tetris.prototype.getGlobalSquareCenters = function() {
     return translateToGlobal(this.pivot, this.squareCenters, this.mod);
@@ -238,6 +240,10 @@ const tetrisFactory = (function() {
       right: right
     };
   };
+  Tetris.prototype.updateStatus = function(tetrisEvent) {
+    this.status.push(tetrisEvent);
+    this.eventCallback();
+  };
 
   // --------- TETRIS TRANSFORMATIONS ----------
 
@@ -249,6 +255,7 @@ const tetrisFactory = (function() {
   Tetris.prototype.moveDown = function() {
     if( this.canMove().down() ) {
       this.pivot.y += this.mod;
+      this.updateStatus("moved down")
     }
   };
   Tetris.prototype.moveLeft = function() {
@@ -272,13 +279,13 @@ const tetrisFactory = (function() {
 
   // -------- FACTORY INTERFACE ---------
 
-	const produce = function(type, point) { // type(string), startPoint - all obligatory
+	const produce = function(type, point, eventCallback) { // type(string), startPoint - all obligatory
     if (type === 'square-type') {
-        return new Tetris_Square( point );
+        return new Tetris_Square(point, eventCallback);
     } else if (type === 's-type') {
-        return new Tetris_S( point );
+        return new Tetris_S(point, eventCallback);
     } else if (type === 'z-type') {
-        return new Tetris_Z( point );
+        return new Tetris_Z(point, eventCallback);
     }  
 	};
   const getRandomName = function() {
@@ -307,8 +314,9 @@ const game = (function() {
   let fallingInterval;
   let fallingRate = 1000;
 
-  const nextTetris = (function() {
-    // const canvas = view.smallCanvas;  
+  ;
+
+  const nextTetris = (function() { 
     const names = []; // populated by 3 possible Tetris types names; first from the array is assigned to fallingTetris;   
     const startPoints = smallCanvas.config.startPoints;
     let currentInstances;
@@ -321,7 +329,6 @@ const game = (function() {
       currentInstances = startPoints.map( 
         (point, i = point[index] ) => tetrisFactory.produce(names[ i ], point) 
       );
-      return currentInstances;
     };
     function getInstances() {
       return currentInstances;
@@ -343,13 +350,24 @@ const game = (function() {
 
   })();
 
+  const gameEventHandler = (function() {
+    // console.log(fallingTetris.getInstance())
+    const fire = function() {
+      console.log("Something happened")
+    }
+    return {
+      fire: fire,
+    }
+  })()
+
   const fallingTetris = (function() {
+    const eventHandler = gameEventHandler.fire;
     const nameOfFirst = nextTetris.getFirstName;
     const startPoint = largeCanvas.config.startPoints[0];
     let currentInstance;
 
     function correctStartAndPlace() {
-      currentInstance = tetrisFactory.produce(nameOfFirst(), startPoint);
+      currentInstance = tetrisFactory.produce(nameOfFirst(), startPoint, eventHandler);
       let allVertices = currentInstance.createSquares().map(square => square.getCartesianVertices() )
       if (!missesModuleOn(allVertices, 10)) {
         return 
@@ -385,6 +403,13 @@ const game = (function() {
   };
 
   // ---- GAME CONTROLS ----  
+
+  function next() {
+    nextTetris.shiftNames();
+    nextTetris.placeOnStart();
+    smallCanvas.updateContent(nextTetris.getInstances());
+    smallCanvas.render();
+  }
 
   function start() {
     if (gameStatus !== 'playing') {
@@ -432,9 +457,25 @@ const game = (function() {
     window.addEventListener('keydown', gameStatusHandler);
     return "Game loaded";
   };
+  // -------------------------------------------
+  // --------------- EVENT LOOP ----------------
+  // -------------------------------------------
+
+  function gameEventsHandler() {
+    const listenedEvents = [
+      {
+        name: "Tetris moved down",
+        callback: tetrisMovedDown,
+      }
+    ];
+    function tetrisMovedDown() {
+      console.log("Callback fired when tetris moved down.")
+    }
+  }
 
   // -------------------------------------------
   // ------------- USER INTERFACE --------------
+  // -------------------------------------------
 
   function gameStatusHandler(event) {
     if (event.code === "Space" && gameStatus === 'playing') {
@@ -445,7 +486,7 @@ const game = (function() {
       start();
     }
   };  
-  const keydownHandler = function(event) {
+  function keydownHandler(event) {
     let targetObject = this;
     if (!targetObject) {
       throw new Error('No keydown target set!')   
