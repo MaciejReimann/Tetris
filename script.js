@@ -224,19 +224,27 @@ const tetrisFactory = (function() {
     let xVertices = this.createSquares().map( (square)  => square.getCartesianVertices('x'));
     let yVertices = this.createSquares().map( (square)  => square.getCartesianVertices('y'));
     const down = function() {
-      return isNotGreaterThen(yVertices, this.range.down);
+      return isNotGreaterThen(yVertices, this.range.down - this.mod);
+    }.bind(this);
+    const left = function() {
+      return isNotSmallerThen(xVertices, this.range.left + this.mod);
+    }.bind(this);
+    const right = function() {
+      return isNotGreaterThen(xVertices, this.range.right - this.mod);
     }.bind(this);
     return {
       down: down,
+      left:left,
+      right: right
     };
   };
 
   // --------- TETRIS TRANSFORMATIONS ----------
 
   Tetris.prototype.moveRight = function() {
-    // if(this.isWithinRange()) {
+    if( this.canMove().right() ) {
       this.pivot.x += this.mod;
-    // }
+    }
   };
   Tetris.prototype.moveDown = function() {
     if( this.canMove().down() ) {
@@ -244,9 +252,9 @@ const tetrisFactory = (function() {
     }
   };
   Tetris.prototype.moveLeft = function() {
-    // if(this.isWithinRange()) {
+    if( this.canMove().left() ) {
       this.pivot.x -= this.mod;
-    // }
+    }
   };
   Tetris.prototype.rotateLeft = function() {
     let rotation = -90;
@@ -352,7 +360,7 @@ const game = (function() {
       correctStartAndPlace();
     };
     const getInstance = function() {
-      return currentInstance;
+      return currentInstance;            
     };
     return {
       placeOnStart: correctStartAndPlace,
