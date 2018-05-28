@@ -101,7 +101,7 @@ function missesModuleOn(vertices, module) {
   } else {
     let vertex = vertices;
     if (vertex.x % module === 0 & vertex.y % module === 0) {
-    	return ;
+    	return;
     } else if(vertex.x % module != 0) {
     	return 'x';
     } else if(vertex.y % module != 0) {
@@ -116,5 +116,14 @@ function isNotGreaterThen(numbers, end) {
   } else {
     let number = numbers;
     return number <= end;
+  };
+};
+
+function isNotSmallerThen(numbers, start) {
+  if(numbers instanceof Array) {
+   return numbers.every( (number) => isNotSmallerThen(number, start) );
+  } else {
+    let number = numbers;
+    return number >= start;
   };
 };
