@@ -182,7 +182,7 @@ const tetrisFactory = (function() {
 
   function Tetris_Z(pivot, eventCallback) {
     Tetris.call(this, pivot, eventCallback);
-    Tetris_S.call(this, pivot);
+    Tetris_S.call(this, pivot, eventCallback);
     this.name = 'z-type';
     this.squareCenters = mirrorByY_Axis(this.squareCenters);
   }
@@ -193,12 +193,18 @@ const tetrisFactory = (function() {
   // --------- MAIN TETRIS CONSTRUCTOR ---------
 
   function Tetris(pivot, eventCallback) { // pivot = { x: x, y: y} in global units
+    // this.start = 
     this.mod = modularUnit;
     this.pivot = pivot; 
     this.angle = 0;
-    this.status = [];
+    // this.status = [];
     this.eventCallback = eventCallback;
   };
+
+  Tetris.prototype.fireEventCallback = function(tetrisEvent) {
+    this.eventCallback(tetrisEvent);
+  };
+
   Tetris.prototype.getGlobalSquareCenters = function() {
     return translateToGlobal(this.pivot, this.squareCenters, this.mod);
   };
@@ -240,10 +246,7 @@ const tetrisFactory = (function() {
       right: right
     };
   };
-  Tetris.prototype.updateStatus = function(tetrisEvent) {
-    this.status.push(tetrisEvent);
-    this.eventCallback();
-  };
+
 
   // --------- TETRIS TRANSFORMATIONS ----------
 
@@ -255,7 +258,9 @@ const tetrisFactory = (function() {
   Tetris.prototype.moveDown = function() {
     if( this.canMove().down() ) {
       this.pivot.y += this.mod;
-      this.updateStatus("moved down")
+      this.fireEventCallback("moved down")
+    } else {
+      this.fireEventCallback("cannot move down");
     }
   };
   Tetris.prototype.moveLeft = function() {
@@ -312,9 +317,9 @@ const game = (function() {
   let gameStatus;
   let clockInterval;
   let fallingInterval;
-  let fallingRate = 1000;
+  let fallingRate = 200;
 
-  ;
+  
 
   const nextTetris = (function() { 
     const names = []; // populated by 3 possible Tetris types names; first from the array is assigned to fallingTetris;   
@@ -350,38 +355,30 @@ const game = (function() {
 
   })();
 
-  const gameEventHandler = (function() {
-    // console.log(fallingTetris.getInstance())
-    const fire = function() {
-      console.log("Something happened")
-    }
-    return {
-      fire: fire,
-    }
-  })()
+  function gameEventHandler (gameEvent) {
+
+    if(gameEvent === "cannot move down") {
+      console.log("cant move Down")
+      next();
+    } 
+  }
 
   const fallingTetris = (function() {
-    const eventHandler = gameEventHandler.fire;
+    let currentInstance;    
+    const eventHandler = gameEventHandler;
     const nameOfFirst = nextTetris.getFirstName;
-    const startPoint = largeCanvas.config.startPoints[0];
-    let currentInstance;
 
-    function correctStartAndPlace() {
-      currentInstance = tetrisFactory.produce(nameOfFirst(), startPoint, eventHandler);
-      let allVertices = currentInstance.createSquares().map(square => square.getCartesianVertices() )
-      if (!missesModuleOn(allVertices, 10)) {
-        return 
-      } else {
-        startPoint [missesModuleOn(allVertices, 10)] += 5;
-        console.log("Corrected on "+ missesModuleOn(allVertices, 10))
-      };
-      correctStartAndPlace();
+    const _getStartPoint = function (){
+      return Object.assign({}, largeCanvas.config.startPoints[0])
+    };
+    function placeOnStart() {   
+      currentInstance = tetrisFactory.produce(nameOfFirst(), _getStartPoint(), eventHandler);
     };
     const getInstance = function() {
       return currentInstance;            
     };
     return {
-      placeOnStart: correctStartAndPlace,
+      placeOnStart: placeOnStart,
       getInstance: getInstance,
     };
   })();
@@ -404,38 +401,41 @@ const game = (function() {
 
   // ---- GAME CONTROLS ----  
 
-  function next() {
-    nextTetris.shiftNames();
+  function smallCanvasUpdate() {
     nextTetris.placeOnStart();
     smallCanvas.updateContent(nextTetris.getInstances());
     smallCanvas.render();
-  }
+  };
+
+  function largeCanvasUpdate() {
+    fallingTetris.placeOnStart();
+    largeCanvas.addContent(fallingTetris.getInstance());
+    largeCanvas.render()
+  };
+
+  function next() {
+    nextTetris.shiftNames();
+    smallCanvasUpdate();    
+    largeCanvasUpdate();
+  };
 
   function start() {
     if (gameStatus !== 'playing') {
       showMessage('pause');
     };
     gameStatus = 'playing';
-
     addIntervals();
-    
-    fallingTetris.placeOnStart();
-    largeCanvas.addContent(fallingTetris.getInstance());
-    largeCanvas.render();
-
+    largeCanvasUpdate();
     nextTetris.shiftNames();
-    nextTetris.placeOnStart();
-    smallCanvas.updateContent(nextTetris.getInstances());
-    smallCanvas.render();
-
-    addKeyControls(fallingTetris.getInstance());
+    smallCanvasUpdate();
+    window.addEventListener('keydown', keydownHandler)
   };
+
   function pause() {
     if (gameStatus !== 'paused') {
       showMessage('resume');
     };
     gameStatus = 'paused';
-
     removeIntervals();
   };
   function resume() {
@@ -443,19 +443,13 @@ const game = (function() {
       showMessage('pause');
     };
     gameStatus = 'playing';
-
     addIntervals()
   };
   function welcome() {
     showMessage('start');
-
-    nextTetris.placeOnStart();
-    smallCanvas.updateContent(nextTetris.getInstances());
-    smallCanvas.render();
-
+    smallCanvasUpdate();
     timer.place();
     window.addEventListener('keydown', gameStatusHandler);
-    return "Game loaded";
   };
   // -------------------------------------------
   // --------------- EVENT LOOP ----------------
@@ -487,7 +481,7 @@ const game = (function() {
     }
   };  
   function keydownHandler(event) {
-    let targetObject = this;
+    let targetObject = fallingTetris.getInstance();
     if (!targetObject) {
       throw new Error('No keydown target set!')   
     };
@@ -504,9 +498,6 @@ const game = (function() {
       };
     });
     largeCanvas.render();
-  };
-  function addKeyControls(obj) {
-    window.addEventListener('keydown', keydownHandler.bind(obj))
   };
 
   // game object has only one method which is called with an IIFE
