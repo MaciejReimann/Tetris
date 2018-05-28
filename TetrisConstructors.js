@@ -2,8 +2,8 @@
 
  // --- POSSIBLE TETRIS SHAPES CONSTRUCTORS ---
   
-function Tetris_Square(pivot, eventCallback) {
-  Tetris.call(this, pivot, eventCallback);
+function Tetris_Square(mod, pivot, eventCallback) {
+  Tetris.call(this, mod, pivot, eventCallback);
   this.name = 'square-type';
   this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot
     {x: -0.5, y: 0.5}, {x: -0.5, y: -0.5}, {x: 0.5, y: -0.5}, {x: 0.5, y: 0.5}
@@ -13,8 +13,8 @@ Tetris_Square.prototype = Object.create(Tetris.prototype);
 Tetris_Square.prototype.constructor = Tetris_Square;
 
 
-function Tetris_S(pivot, eventCallback) {
-  Tetris.call(this, pivot, eventCallback);
+function Tetris_S(mod, pivot, eventCallback) {
+  Tetris.call(this, mod, pivot, eventCallback);
   this.name = 's-type';
   this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot in local units
     {x: -1, y: 0.5}, {x: 0, y: 0.5}, {x: 0, y: -0.5}, {x: 1, y: -0.5}
@@ -24,9 +24,9 @@ Tetris_S.prototype = Object.create(Tetris.prototype);
 Tetris_S.prototype.constructor = Tetris_S;
 
 
-function Tetris_Z(pivot, eventCallback) {
-  Tetris.call(this, pivot, eventCallback);
-  Tetris_S.call(this, pivot, eventCallback);
+function Tetris_Z(mod, pivot, eventCallback) {
+  Tetris.call(this, mod, pivot, eventCallback);
+  Tetris_S.call(this, mod, pivot, eventCallback);
   this.name = 'z-type';
   this.squareCenters = mirrorByY_Axis(this.squareCenters);
 }
@@ -36,9 +36,9 @@ Tetris_Z.prototype.constructor = Tetris_Z;
 
 // --------- MAIN TETRIS CONSTRUCTOR ---------
 
-function Tetris(pivot, eventCallback) { // pivot = { x: x, y: y} in global units
+function Tetris(mod, pivot, eventCallback) { // pivot = { x: x, y: y} in global units
   // this.start = 
-  this.mod = modularUnit;
+  this.mod = mod;
   this.pivot = pivot; 
   this.angle = 0;
   // this.status = [];
@@ -61,7 +61,7 @@ Tetris.prototype.drawFill = function(canvas) { // this function is called as Can
   this.canvas = canvas;
   this.createSquares().forEach((square) => square.drawFill(this.canvas.ctx));
 };
-Tetris.prototype.setRectangularRange = function(range) {
+Tetris.prototype.setRectangularRange = function(range) { // to be defined in tetris factory 
   if(!range) {
     this.range = range || {
       left: 0,
@@ -99,12 +99,12 @@ Tetris.prototype.moveRight = function() {
   }
 };
 Tetris.prototype.moveDown = function() {
-  if( this.canMove().down() ) {
+  // if( this.canMove().down() ) {
     this.pivot.y += this.mod;
-    this.fireEventCallback("moved down")
-  } else {
-    this.fireEventCallback("cannot move down");
-  }
+    // this.fireEventCallback("moved down")
+  // } else {
+  //   this.fireEventCallback("cannot move down");
+  // }
 };
 Tetris.prototype.moveLeft = function() {
   if( this.canMove().left() ) {

@@ -11,11 +11,11 @@ function TetrisFactory (modularUnit, colorPalette) {
 
 TetrisFactory.prototype.produce = function(type, point, eventCallback) { // type(string), startPoint - all obligatory
     if (type === 'square-type') {
-        return new Tetris_Square(point, eventCallback);
+        return new Tetris_Square(this.modularUnit, point, eventCallback);
     } else if (type === 's-type') {
-        return new Tetris_S(point, eventCallback);
+        return new Tetris_S(this.modularUnit, point, eventCallback);
     } else if (type === 'z-type') {
-        return new Tetris_Z(point, eventCallback);
+        return new Tetris_Z(this.modularUnit, point, eventCallback);
     }  
 };
 

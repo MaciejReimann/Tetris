@@ -145,7 +145,6 @@ poly.drawOutline(view.largeCanvas.ctx);
 sqr.drawOutline(view.largeCanvas.ctx);
 
 
-
 const tetrisFactory = new TetrisFactory(view.canvasConfig.modularUnit);
 
 // --------------------------------------------------------
@@ -163,7 +162,7 @@ const game = (function() {
   let gameStatus;
   let clockInterval;
   let fallingInterval;
-  let fallingRate = 200;
+  
 
   
 
@@ -201,16 +200,10 @@ const game = (function() {
 
   })();
 
-  function gameEventsHandler (gameEvent) {
-
-    if(gameEvent === "cannot move down") {
-      console.log("cant move Down")
-      next();
-    }
-  }
-
   const fallingTetris = (function() {
-    let currentInstance;    
+    let currentInstance;
+    let _fallingRate = 200;
+    let _interval;
     const eventsHandler = gameEventsHandler;
 
     function _nameOfFirst() {
@@ -225,47 +218,67 @@ const game = (function() {
     function getInstance() {
       return currentInstance;            
     };
-    function keydownHandler(event) {
-      let targetObject = getInstance();
-      if (!targetObject) {
-        throw new Error('No keydown target set!')   
-      };
-      const listenedKeys = {
-        ArrowDown: "moveDown",
-        ArrowRight: "moveRight",
-        ArrowLeft: "moveLeft",
-        z: "rotateLeft",
-        a: "rotateRight",
-      }
-      Object.keys(listenedKeys).forEach( (name) => {
-        if(event.key === name) {
+    function _fallDown() {
+      positionHandler("Move Down");
+    }
+    function addInterval() {
+      _interval = setInterval(_fallDown, _fallingRate);
+    }
+    function removeInterval() {
+      clearInterval(_interval);
+    }
+    function positionHandler(event) {
+      let tetris = getInstance();
 
-          targetObject[ listenedKeys[name] ] ();
-        };
-      });
-      largeCanvas.render();
+      if(event.key === 'ArrowDown' || event === "Move Down") {
+        if( tetris.canMove().down() ) {
+          tetris.moveDown();
+        } else {
+          gameEventsHandler("Cannot move down")
+        }
+      } else if(event.key === 'ArrowRight') {
+        tetris.moveRight();
+      } else if(event.key === 'ArrowLeft') {
+        tetris.moveLeft();
+      } else if(event.key === 'z') {
+        tetris.rotateLeft();
+      } else if(event.key === 'a') {
+        tetris.rotateRight();
+      }
+      gameEventsHandler("position changed");
     };
+    
     return {
-      keydownHandler: keydownHandler,
+      addInterval:addInterval,
+      removeInterval:removeInterval,
+      positionHandler: positionHandler,
       placeOnStart: placeOnStart,
       getInstance: getInstance,
     };
   })();
 
+  function gameEventsHandler (gameEvent) {
+    console.log(gameEvent);
+    if(gameEvent === "position changed") {
+      largeCanvas.render();
+    }
+
+    if(gameEvent === "Cannot move down") {
+      console.log("cant move Down")
+      next();
+    }
+  };
+
   function addIntervals() {
     clockInterval = setInterval(clockTicking, 1000);
-    fallingInterval = setInterval(fallDown, fallingRate);  
+    fallingInterval = fallingTetris.addInterval();
   };
   function removeIntervals() {
     clearInterval(clockInterval);
-    clearInterval(fallingInterval); 
+    fallingTetris.removeInterval() 
   };
   function clockTicking() {
     timer.renderIncremented();
-  };
-  function fallDown() {
-    fallingTetris.getInstance().moveDown();
-    largeCanvas.render();
   };
 
   // ----------- GAME FLOW ----------  
@@ -292,11 +305,12 @@ const game = (function() {
       showMessage('pause');
     };
     gameStatus = 'playing';
-    addIntervals();
+    
     largeCanvasUpdate();
     nextTetris.shiftNames();
     smallCanvasUpdate();
-    window.addEventListener('keydown', fallingTetris.keydownHandler);
+    addIntervals();
+    window.addEventListener('keydown', fallingTetris.positionHandler);    
   };
   function pause() {
     if (gameStatus !== 'paused') {
@@ -304,7 +318,7 @@ const game = (function() {
     };
     gameStatus = 'paused';
     removeIntervals();
-    window.removeEventListener('keydown', fallingTetris.keydownHandler);
+    window.removeEventListener('keydown', fallingTetris.positionHandler);
   };
   function resume() {
     if (gameStatus !== 'playing') {
@@ -312,7 +326,7 @@ const game = (function() {
     };
     gameStatus = 'playing';
     addIntervals();
-    window.addEventListener('keydown', fallingTetris.keydownHandler);
+    window.addEventListener('keydown', fallingTetris.positionHandler);
   };
   function welcome() {
     showMessage('start');
