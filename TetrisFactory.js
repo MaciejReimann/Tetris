@@ -9,13 +9,13 @@ function TetrisFactory (modularUnit, colorPalette) {
   // const possibleShapes = ['square-type', 's-type', 'z-type', 'i-type', 'l-type', 'l-type-mirrored'];
 };
 
-TetrisFactory.prototype.produce = function(type, point, eventCallback) { // type(string), startPoint - all obligatory
+TetrisFactory.prototype.produce = function(type, point) { // type(string), startPoint - all obligatory
     if (type === 'square-type') {
-        return new Tetris_Square(this.modularUnit, point, eventCallback);
+        return new Tetris_Square(this.modularUnit, point);
     } else if (type === 's-type') {
-        return new Tetris_S(this.modularUnit, point, eventCallback);
+        return new Tetris_S(this.modularUnit, point);
     } else if (type === 'z-type') {
-        return new Tetris_Z(this.modularUnit, point, eventCallback);
+        return new Tetris_Z(this.modularUnit, point);
     }  
 };
 

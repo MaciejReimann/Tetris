@@ -142,7 +142,6 @@ const game = (function() {
     let currentInstance;
     let _fallingRate = 500;
     let _interval;
-    const eventsHandler = gameEventsHandler;
 
     function _nameOfFirst() {
       return nextTetris.getFirstName();
@@ -154,7 +153,7 @@ const game = (function() {
       positionHandler("Move Down");
     }
     function placeOnStart() {   
-      currentInstance = tetrisFactory.produce(_nameOfFirst(), _getStartPoint(), eventsHandler);
+      currentInstance = tetrisFactory.produce(_nameOfFirst(), _getStartPoint());
     };
     function getInstance() {
       return currentInstance;            

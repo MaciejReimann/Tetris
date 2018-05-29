@@ -2,8 +2,8 @@
 
  // --- POSSIBLE TETRIS SHAPES CONSTRUCTORS ---
   
-function Tetris_Square(mod, pivot, eventCallback) {
-  Tetris.call(this, mod, pivot, eventCallback);
+function Tetris_Square(mod, pivot) {
+  Tetris.call(this, mod, pivot);
   this.name = 'square-type';
   this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot
     {x: -0.5, y: 0.5}, {x: -0.5, y: -0.5}, {x: 0.5, y: -0.5}, {x: 0.5, y: 0.5}
@@ -13,8 +13,8 @@ Tetris_Square.prototype = Object.create(Tetris.prototype);
 Tetris_Square.prototype.constructor = Tetris_Square;
 
 
-function Tetris_S(mod, pivot, eventCallback) {
-  Tetris.call(this, mod, pivot, eventCallback);
+function Tetris_S(mod, pivot) {
+  Tetris.call(this, mod, pivot);
   this.name = 's-type';
   this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot in local units
     {x: -1, y: 0.5}, {x: 0, y: 0.5}, {x: 0, y: -0.5}, {x: 1, y: -0.5}
@@ -24,9 +24,9 @@ Tetris_S.prototype = Object.create(Tetris.prototype);
 Tetris_S.prototype.constructor = Tetris_S;
 
 
-function Tetris_Z(mod, pivot, eventCallback) {
-  Tetris.call(this, mod, pivot, eventCallback);
-  Tetris_S.call(this, mod, pivot, eventCallback);
+function Tetris_Z(mod, pivot) {
+  Tetris.call(this, mod, pivot);
+  Tetris_S.call(this, mod, pivot);
   this.name = 'z-type';
   this.squareCenters = mirrorByY_Axis(this.squareCenters);
 }
@@ -36,17 +36,11 @@ Tetris_Z.prototype.constructor = Tetris_Z;
 
 // --------- MAIN TETRIS CONSTRUCTOR ---------
 
-function Tetris(mod, pivot, eventCallback) { // pivot = { x: x, y: y} in global units
+function Tetris(mod, pivot) { // pivot = { x: x, y: y} in global units
   // this.start = 
   this.mod = mod;
   this.pivot = pivot; 
   this.angle = 0;
-  // this.status = [];
-  this.eventCallback = eventCallback;
-};
-
-Tetris.prototype.fireEventCallback = function(tetrisEvent) {
-  this.eventCallback(tetrisEvent);
 };
 
 Tetris.prototype.getGlobalSquareCenters = function() {
