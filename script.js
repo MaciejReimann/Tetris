@@ -92,17 +92,14 @@ const timer = new Timer(view.timer);
 // --------------------------------------------------------
 
 const game = (function() {
+  let gameStatus;
   const showMessage = view.showMessage;
   const smallCanvas = view.smallCanvas;
   const largeCanvas = view.largeCanvas;
 
   // closures; to be assigned/udated by the below functions
-  let gameStatus;
   let clockInterval;
-  let fallingInterval;
-  
-
-  
+ 
 
   const nextTetris = (function() { 
     const names = []; // populated by 3 possible Tetris types names; first from the array is assigned to fallingTetris;   
@@ -139,9 +136,9 @@ const game = (function() {
   })();
 
   const fallingTetris = (function() {
-    let currentInstance;
     let _fallingRate = 500;
     let _interval;
+    let currentInstance;    
 
     function _nameOfFirst() {
       return nextTetris.getFirstName();
@@ -215,15 +212,12 @@ const game = (function() {
   };
 
   function addIntervals() {
-    clockInterval = setInterval(clockTicking, 1000);
-    fallingInterval = fallingTetris.addInterval();
+    timer.addInterval();
+    fallingTetris.addInterval();
   };
   function removeIntervals() {
-    clearInterval(clockInterval);
-    fallingTetris.removeInterval() 
-  };
-  function clockTicking() {
-    timer.renderIncremented();
+    timer.removeInterval();
+    fallingTetris.removeInterval();
   };
 
   // ----------- GAME FLOW ----------  
