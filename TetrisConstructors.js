@@ -71,46 +71,61 @@ Tetris.prototype.setRectangularRange = function(range) { // to be defined in tet
     }
   };
 };
-Tetris.prototype.canMove = function() {
+Tetris.prototype.can = function() {
   this.setRectangularRange();
-  let xVertices = this.createSquares().map( (square)  => square.getCartesianVertices('x'));
-  let yVertices = this.createSquares().map( (square)  => square.getCartesianVertices('y'));
-  const down = function() {
-    return isNotGreaterThen(yVertices, this.range.down - this.mod);
+  const xVertices = function() {
+    return this.createSquares().map( (square)  => square.getCartesianVertices('x'));
   }.bind(this);
-  const left = function() {
-    return isNotSmallerThen(xVertices, this.range.left + this.mod);
+  const yVertices = function() {
+    return this.createSquares().map( (square)  => square.getCartesianVertices('y'));
   }.bind(this);
-  const right = function() {
-    return isNotGreaterThen(xVertices, this.range.right - this.mod);
+  const moveDown = function() {
+    return isNotGreaterThen(yVertices(), this.range.down - this.mod);
+  }.bind(this);
+  const moveLeft = function() {
+    return isNotSmallerThen(xVertices(), this.range.left + this.mod);
+  }.bind(this);
+  const moveRight = function() {
+    return isNotGreaterThen(xVertices(), this.range.right - this.mod);
+  }.bind(this);
+  const rotate = function(rot1, rot2) {  
+    this[rot1]();
+    if( isNotGreaterThen(yVertices(), this.range.down) &&
+        isNotSmallerThen(xVertices(), this.range.left) && 
+        isNotGreaterThen(xVertices(), this.range.right)
+      ) {
+      this[rot2]();
+      return true;
+    } else {
+      this[rot2]();
+      return false;
+    }
   }.bind(this);
   return {
-    down: down,
-    left:left,
-    right: right
+    moveDown: moveDown,
+    moveLeft:moveLeft,
+    moveRight: moveRight,
+    rotate: rotate,
   };
 };
 
 // --------- TETRIS TRANSFORMATIONS ----------
 
 Tetris.prototype.moveRight = function() {
-  if( this.canMove().right() ) {
     this.pivot.x += this.mod;
-  }
 };
 Tetris.prototype.moveDown = function() {
-  // if( this.canMove().down() ) {
     this.pivot.y += this.mod;
-    // this.fireEventCallback("moved down")
-  // } else {
-  //   this.fireEventCallback("cannot move down");
-  // }
 };
 Tetris.prototype.moveLeft = function() {
-  if( this.canMove().left() ) {
     this.pivot.x -= this.mod;
-  }
 };
+// Tetris.prototype.rotate = function(angle) {
+//   let rotation = angle;
+//   this.squareCenters = translateToCartesian( 
+//     rotatePolar( translateToPolar(this.squareCenters), rotation ) );
+//   this.angle = this.angle % 360 + rotation;
+// };
 Tetris.prototype.rotateLeft = function() {
   let rotation = -90;
   this.squareCenters = translateToCartesian( 

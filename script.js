@@ -202,7 +202,7 @@ const game = (function() {
 
   const fallingTetris = (function() {
     let currentInstance;
-    let _fallingRate = 200;
+    let _fallingRate = 500;
     let _interval;
     const eventsHandler = gameEventsHandler;
 
@@ -212,15 +212,15 @@ const game = (function() {
     function _getStartPoint() {
       return Object.assign({}, largeCanvas.config.startPoints[0])
     };
+    function _fallDown() {
+      positionHandler("Move Down");
+    }
     function placeOnStart() {   
       currentInstance = tetrisFactory.produce(_nameOfFirst(), _getStartPoint(), eventsHandler);
     };
     function getInstance() {
       return currentInstance;            
-    };
-    function _fallDown() {
-      positionHandler("Move Down");
-    }
+    };   
     function addInterval() {
       _interval = setInterval(_fallDown, _fallingRate);
     }
@@ -231,23 +231,31 @@ const game = (function() {
       let tetris = getInstance();
 
       if(event.key === 'ArrowDown' || event === "Move Down") {
-        if( tetris.canMove().down() ) {
+        if(tetris.can().moveDown()) {
           tetris.moveDown();
         } else {
           gameEventsHandler("Cannot move down")
         }
       } else if(event.key === 'ArrowRight') {
-        tetris.moveRight();
+        if (tetris.can().moveRight()) {
+          tetris.moveRight();
+        }
       } else if(event.key === 'ArrowLeft') {
-        tetris.moveLeft();
-      } else if(event.key === 'z') {
-        tetris.rotateLeft();
-      } else if(event.key === 'a') {
-        tetris.rotateRight();
+        if (tetris.can().moveLeft()) {
+          tetris.moveLeft();
+        }
+      } else if(event.key === 'z'|| event.key === 'Z') {
+        if(tetris.can().rotate('rotateLeft', 'rotateRight')) {
+          tetris.rotateLeft();
+        }
+      } else if(event.key === 'a'|| event.key === 'A') {
+        if(tetris.can().rotate('rotateRight', 'rotateLeft')) {
+          tetris.rotateRight();
+        }
       }
       gameEventsHandler("position changed");
     };
-    
+
     return {
       addInterval:addInterval,
       removeInterval:removeInterval,
