@@ -98,8 +98,6 @@ const game = (function() {
   const largeCanvas = view.largeCanvas;
 
   // closures; to be assigned/udated by the below functions
-  let clockInterval;
- 
 
   const nextTetris = (function() { 
     const names = []; // populated by 3 possible Tetris types names; first from the array is assigned to fallingTetris;   
@@ -117,6 +115,9 @@ const game = (function() {
     };
     function getInstances() {
       return currentInstances;
+    };
+    function getSquares() {
+      return flatten(currentInstances.map(tetris => tetris.createSquares()));
     };
     function shiftNames() {
       names.push(tetrisFactory.getRandomName());
@@ -138,7 +139,13 @@ const game = (function() {
   const fallingTetris = (function() {
     let _fallingRate = 500;
     let _interval;
-    let currentInstance;    
+    let currentInstance;
+
+    function collide() {
+      const tetrisOnCanvas = largeCanvas.getSquares();
+
+      // console.log(tetrisOnCanvas);
+    }
 
     function _nameOfFirst() {
       return nextTetris.getFirstName();
@@ -154,6 +161,9 @@ const game = (function() {
     };
     function getInstance() {
       return currentInstance;            
+    };
+    function getSquares() {
+       return currentInstance.createSquares();            
     };   
     function addInterval() {
       _interval = setInterval(_fallDown, _fallingRate);
@@ -166,6 +176,7 @@ const game = (function() {
 
       if(event.key === 'ArrowDown' || event === "Move Down") {
         if(tetris.can().moveDown()) {
+          collide()
           tetris.moveDown();
         } else {
           gameEventsHandler("Cannot move down")
@@ -195,6 +206,7 @@ const game = (function() {
       removeInterval:removeInterval,
       positionHandler: positionHandler,
       placeOnStart: placeOnStart,
+      getSquares: getSquares,
       getInstance: getInstance,
     };
   })();
@@ -224,18 +236,20 @@ const game = (function() {
 
   function smallCanvasUpdate() {
     nextTetris.placeOnStart();
-    smallCanvas.updateContent(nextTetris.getInstances());
+    smallCanvas.updateTetris(nextTetris.getInstances());
     smallCanvas.render();
   };
 
   function largeCanvasUpdate() {
     fallingTetris.placeOnStart();
-    largeCanvas.addContent(fallingTetris.getInstance());
-    largeCanvas.render()
+    largeCanvas.updateTetris(fallingTetris.getInstance());
+    largeCanvas.render();
   };
 
   function next() {
     nextTetris.shiftNames();
+    largeCanvas.addSquares( fallingTetris.getSquares() );
+    console.log(largeCanvas.getSquares())
     smallCanvasUpdate();    
     largeCanvasUpdate();
   };

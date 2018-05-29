@@ -8,11 +8,18 @@ function clear(parentElement) {
   }
 };
 
-// ----- VERTEX TRANSFORMATION FUNCTIONS ------
+
+// ----- ARRAY TRANSFORMATION FUNCTIONS -----
 
 function getRandomItem(array) {
   return array[ Math.floor(Math.random() * array.length) ];
 };
+
+function flatten(array) {
+  return array.reduce((acc, val) => acc.concat(val), []);
+};
+
+// ----- VERTEX TRANSFORMATION FUNCTIONS ------
 
 function translateToGlobal(localZero, localVertices, mod) { // localZero in global units, localVertices in local units, mod - the size of the local unit
   if(!mod) { mod = 1 }; // mod will not affect the return values;

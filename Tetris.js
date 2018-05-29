@@ -51,6 +51,7 @@ Tetris.prototype.createSquares = function() {
     (point) => new Square(this.mod, point, this.angle + 45) 
     );
 };
+
 Tetris.prototype.drawFill = function(canvas) { // this function is called as Canvas method, where canvas.ctx is passed;
   this.canvas = canvas;
   this.createSquares().forEach((square) => square.drawFill(this.canvas.ctx));
