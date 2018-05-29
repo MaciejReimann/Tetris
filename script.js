@@ -64,78 +64,15 @@ view.canvasConfig = (function(mod, width, height) { // takes in modular unit val
   };
 })(10, 40, 45);
 
-const Canvas = function(config) {
-  this.config = config;
-  this.canvas = document.createElement('canvas');
-  this.canvas.className = config.className;
-  this.canvas.width = config.width;
-  this.canvas.height = config.height;  
-  config.parentElement.appendChild(this.canvas);
-  this.ctx = this.canvas.getContext('2d');
-  this.shapes = [];
-};
-Canvas.prototype.clear = function() {
-  this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-};
-Canvas.prototype.render = function(shape) {
-  this.clear();
-  this.renderContent();
-};
-Canvas.prototype.addContent = function(shapes) {
-  if(shapes instanceof Array) {
-    shapes.forEach((shape) => this.shapes.push(shape));
-  } else {
-    this.shapes.push(shapes);
-  }
-};
-Canvas.prototype.updateContent = function(shapes) {
-  this.shapes = [];
-  this.addContent(shapes)
-};
-Canvas.prototype.renderContent = function(shape) {
-  this.shapes.forEach((shape) => {
-    shape.drawFill(this); // passes canvas object reference to Tetris
-  });
-}
+
 
 
 view.largeCanvas = new Canvas(view.canvasConfig.largeCanvas);
 view.smallCanvas = new Canvas(view.canvasConfig.smallCanvas);
 view.main.insertBefore(view.smallCanvas.canvas, view.largeCanvas.canvas);
 
-// --- DOM MANIPULATION ----
 
-function clear(parentElement) {
-  if(parentElement.firstElementChild !== null) {
-    parentElement.removeChild(parentElement.firstElementChild);
-  }
-};
 
-// --- TIMER SETUP ----
-
-const timer = (function () {
-  const parentElement = view.timer;
-  const timerDiv = document.createElement('div');
-  let timeInSeconds = 0;
-  timerDiv.textContent = timeInSeconds;
-
-  const renderIncremented = function() {
-    timeInSeconds++;
-    render();
-  };
-  const render = function() {
-    clear(parentElement);
-    place();
-  };
-  const place = function() {
-    timerDiv.textContent = timeInSeconds;
-    parentElement.appendChild(timerDiv);
-  };
-  return {
-    place: place,
-    renderIncremented: renderIncremented
-  }
-})();
 
 const size = view.canvasConfig.modularUnit;
 const centerOfCanvas = {x:200, y: 225}
@@ -146,6 +83,7 @@ sqr.drawOutline(view.largeCanvas.ctx);
 
 
 const tetrisFactory = new TetrisFactory(view.canvasConfig.modularUnit);
+const timer = new Timer(view.timer);
 
 // --------------------------------------------------------
 // --------------------------------------------------------
@@ -339,7 +277,7 @@ const game = (function() {
   function welcome() {
     showMessage('start');
     smallCanvasUpdate();
-    timer.place();
+    timer.append();
     window.addEventListener('keydown', gameStatusHandler);
   };
 

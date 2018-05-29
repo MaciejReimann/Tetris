@@ -1,5 +1,13 @@
 
 
+// --- DOM MANIPULATION ----
+
+function clear(parentElement) {
+  if(parentElement.firstElementChild !== null) {
+    parentElement.removeChild(parentElement.firstElementChild);
+  }
+};
+
 // ----- VERTEX TRANSFORMATION FUNCTIONS ------
 
 function getRandomItem(array) {
