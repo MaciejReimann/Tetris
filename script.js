@@ -129,24 +129,14 @@ const game = (function() {
 
   })();
 
-  const tetrisOnCanvas = (function() {
-
-    return {
-
-    }
-  })();
-
   const fallingTetris = (function() {
     let _fallingRate = 500;
     let _interval;
     let currentInstance;
 
-    function collide() {
-      const allSquares = largeCanvas.getSquares();
-
-      // console.log(tetrisOnCanvas);
-    }
-
+    function _tetrisOnCanvas() {
+      return largeCanvas.getSquares();
+    };
     function _nameOfFirst() {
       return nextTetris.getFirstName();
     };
@@ -175,8 +165,9 @@ const game = (function() {
       let tetris = getInstance();
 
       if(event.key === 'ArrowDown' || event === "Move Down") {
-        if(tetris.staysOnCanvasWhen().movedDown()) {
-          collide()
+        if(tetris.staysOnCanvasWhen().movedDown()  
+          && !tetris.collidesWith(_tetrisOnCanvas).whenMovedDown()
+          ) {
           tetris.moveDown();
         } else {
           gameEventsHandler("Cannot move down")

@@ -46,6 +46,9 @@ function Tetris(mod, pivot) { // pivot = { x: x, y: y} in global units
 Tetris.prototype.getGlobalSquareCenters = function() {
   return translateToGlobal(this.pivot, this.squareCenters, this.mod);
 };
+Tetris.prototype.getCartesianVertices = function() {
+  return this.createSquares().map( square => square.getCartesianVertices() );
+};
 Tetris.prototype.createSquares = function() {
   return this.getGlobalSquareCenters().map( 
     (point) => new Square(this.mod, point, this.angle + 45) 
@@ -103,6 +106,27 @@ Tetris.prototype.staysOnCanvasWhen = function() {
     rotated: rotated,
   };
 };
+Tetris.prototype.collidesWith = function(callback) {
+  const staticSquares = callback();
+  const staticVertices = staticSquares.map(square => square.getCartesianVertices())
+
+  const whenMovedDown = function() {
+    this.moveDown();
+    // const dynamicVertices = this.getCartesianVertices();
+    // dynamicVertices.forEach(dynamicVertex => staticVertices.find(static => static === dynamic))
+
+
+    // console.log(dynamicVertices)
+    console.log(staticVertices);
+    this.moveUp();
+    return false;
+  }.bind(this);
+
+  return {
+    whenMovedDown: whenMovedDown,
+
+  };
+};
 
 // --------- TETRIS TRANSFORMATIONS ----------
 
@@ -114,6 +138,9 @@ Tetris.prototype.moveDown = function() {
 };
 Tetris.prototype.moveLeft = function() {
     this.pivot.x -= this.mod;
+};
+Tetris.prototype.moveUp = function() {
+    this.pivot.y -= this.mod;
 };
 // Tetris.prototype.rotate = function(angle) {
 //   let rotation = angle;

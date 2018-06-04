@@ -1,7 +1,4 @@
 
-const Shape = function() {
-
-}
 
 
 const RegularPolygon = function(n, r, center, angle) {
@@ -18,7 +15,7 @@ RegularPolygon.prototype.getCartesianVertices = function(axis) {
   let verticesArray = [];
   let xVertices = [];
   let yVertices = [];
-  for (let i = 0; i < this.numberOfSides; i ++ ) {    
+  for (let i = 0; i < this.numberOfSides; i ++ ) {
     let vertex = translateToCartesian(
       {
         r: this.radius,
@@ -38,6 +35,14 @@ RegularPolygon.prototype.getCartesianVertices = function(axis) {
   };
   return verticesArray;
 };
+// RegularPolygon.prototype.fullyOverlaps = function(shape) {
+//   const vertices1 = this.getCartesianVertices();
+//   const vertices2 = shape.getCartesianVertices();
+//   if() {
+//     return true
+//   }
+//   return false
+// };
 
 RegularPolygon.prototype.drawOutline = function(context, outlineColor) {
   this.outlineColor = outlineColor;

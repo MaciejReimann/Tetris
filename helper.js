@@ -21,16 +21,33 @@ function flatten(array) {
 
 // ----- VERTEX TRANSFORMATION FUNCTIONS ------
 
+const CartesianVertex = function(x,y,z) {
+  this.x = x;
+  this.y = y;
+  this.z = z;
+};
+CartesianVertex.prototype.equals = function(vertex) {
+  if(this.x === vertex.x && this.y === vertex.y) {
+    return true
+  };
+  return false;
+};
+CartesianVertex.prototype.add = function(vertex) {
+  return new Vertex(this.x + vertex.x, this.y + vertex.y);
+};
+CartesianVertex.prototype.subtract = function(vertex) {
+  return new Vertex(this.x - vertex.x, this.y - vertex.y);
+};
+
 function translateToGlobal(localZero, localVertices, mod) { // localZero in global units, localVertices in local units, mod - the size of the local unit
   if(!mod) { mod = 1 }; // mod will not affect the return values;
   if(localVertices instanceof Array) {
     return localVertices.map( (localVertex) => translateToGlobal(localZero, localVertex, mod) );
   } else {
     let localVertex = localVertices;
-    return { // vertex in global units
-      x: localZero.x + localVertex.x * mod,
-      y: localZero.y + localVertex.y * mod 
-    };
+    let x = localZero.x + localVertex.x * mod;
+    let y = localZero.y + localVertex.y * mod;
+    return new CartesianVertex(x,y) // vertex in global units  
   };
 };
 
@@ -51,11 +68,10 @@ if(vertices instanceof Array) {
     return vertices.map( (vertex) => translateToCartesian(vertex) );
   } else { // TODO: Add argument validation - check if vertices has r and angle property and their value is number, else throw an Error;  
     let vertex = vertices;
-    let n = 0; // optional angle parameter    
-    return {
-      x: vertex.r * Math.cos( (vertex.angle - n) * (Math.PI / 180) ),
-      y: vertex.r * Math.sin( (vertex.angle - n) * (Math.PI / 180) ),
-    };
+    let n = 0; // optional angle parameter;
+    let x = vertex.r * Math.cos( (vertex.angle - n) * (Math.PI / 180) );
+    let y = vertex.r * Math.sin( (vertex.angle - n) * (Math.PI / 180) );
+    return new CartesianVertex(x,y);
   };
 };
 
