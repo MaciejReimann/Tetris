@@ -97,8 +97,6 @@ const game = (function() {
   const smallCanvas = view.smallCanvas;
   const largeCanvas = view.largeCanvas;
 
-  // closures; to be assigned/udated by the below functions
-
   const nextTetris = (function() { 
     const names = []; // populated by 3 possible Tetris types names; first from the array is assigned to fallingTetris;   
     const startPoints = smallCanvas.config.startPoints;
@@ -107,7 +105,6 @@ const game = (function() {
     const generateNames = function() {
       startPoints.forEach((point) => names.push(tetrisFactory.getRandomName()))
     }();
-
     const placeOnStart = function() {
       currentInstances = startPoints.map( 
         (point, i = point[index] ) => tetrisFactory.produce(names[ i ], point) 
@@ -116,14 +113,10 @@ const game = (function() {
     function getInstances() {
       return currentInstances;
     };
-    function getSquares() {
-      return flatten(currentInstances.map(tetris => tetris.createSquares()));
-    };
     function shiftNames() {
       names.push(tetrisFactory.getRandomName());
       names.shift();
     };
-
     function getFirstName() {
       return names[0]    
     };
@@ -136,13 +129,20 @@ const game = (function() {
 
   })();
 
+  const tetrisOnCanvas = (function() {
+
+    return {
+
+    }
+  })();
+
   const fallingTetris = (function() {
     let _fallingRate = 500;
     let _interval;
     let currentInstance;
 
     function collide() {
-      const tetrisOnCanvas = largeCanvas.getSquares();
+      const allSquares = largeCanvas.getSquares();
 
       // console.log(tetrisOnCanvas);
     }
@@ -175,26 +175,26 @@ const game = (function() {
       let tetris = getInstance();
 
       if(event.key === 'ArrowDown' || event === "Move Down") {
-        if(tetris.can().moveDown()) {
+        if(tetris.staysOnCanvasWhen().movedDown()) {
           collide()
           tetris.moveDown();
         } else {
           gameEventsHandler("Cannot move down")
         }
       } else if(event.key === 'ArrowRight') {
-        if (tetris.can().moveRight()) {
+        if (tetris.staysOnCanvasWhen().movedRight()) {
           tetris.moveRight();
         }
       } else if(event.key === 'ArrowLeft') {
-        if (tetris.can().moveLeft()) {
+        if (tetris.staysOnCanvasWhen().movedLeft()) {
           tetris.moveLeft();
         }
       } else if(event.key === 'z'|| event.key === 'Z') {
-        if(tetris.can().rotate('rotateLeft', 'rotateRight')) {
+        if(tetris.staysOnCanvasWhen().rotated('rotateLeft', 'rotateRight')) {
           tetris.rotateLeft();
         }
       } else if(event.key === 'a'|| event.key === 'A') {
-        if(tetris.can().rotate('rotateRight', 'rotateLeft')) {
+        if(tetris.staysOnCanvasWhen().rotated('rotateRight', 'rotateLeft')) {
           tetris.rotateRight();
         }
       }
@@ -248,8 +248,7 @@ const game = (function() {
 
   function next() {
     nextTetris.shiftNames();
-    largeCanvas.addSquares( fallingTetris.getSquares() );
-    console.log(largeCanvas.getSquares())
+    largeCanvas.addSquares(fallingTetris.getSquares());
     smallCanvasUpdate();    
     largeCanvasUpdate();
   };

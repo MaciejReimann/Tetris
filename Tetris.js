@@ -66,7 +66,7 @@ Tetris.prototype.setRectangularRange = function(range) { // to be defined in tet
     }
   };
 };
-Tetris.prototype.can = function() {
+Tetris.prototype.staysOnCanvasWhen = function() {
   this.setRectangularRange();
   const xVertices = function() {
     return this.createSquares().map( (square)  => square.getCartesianVertices('x'));
@@ -74,16 +74,16 @@ Tetris.prototype.can = function() {
   const yVertices = function() {
     return this.createSquares().map( (square)  => square.getCartesianVertices('y'));
   }.bind(this);
-  const moveDown = function() {
+  const movedDown = function() {
     return isNotGreaterThen(yVertices(), this.range.down - this.mod);
   }.bind(this);
-  const moveLeft = function() {
+  const movedLeft = function() {
     return isNotSmallerThen(xVertices(), this.range.left + this.mod);
   }.bind(this);
-  const moveRight = function() {
+  const movedRight = function() {
     return isNotGreaterThen(xVertices(), this.range.right - this.mod);
   }.bind(this);
-  const rotate = function(rot1, rot2) {  
+  const rotated = function(rot1, rot2) {  
     this[rot1]();
     if( isNotGreaterThen(yVertices(), this.range.down) &&
         isNotSmallerThen(xVertices(), this.range.left) && 
@@ -97,10 +97,10 @@ Tetris.prototype.can = function() {
     }
   }.bind(this);
   return {
-    moveDown: moveDown,
-    moveLeft:moveLeft,
-    moveRight: moveRight,
-    rotate: rotate,
+    movedDown: movedDown,
+    movedLeft: movedLeft,
+    movedRight: movedRight,
+    rotated: rotated,
   };
 };
 
