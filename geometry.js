@@ -35,14 +35,17 @@ RegularPolygon.prototype.getCartesianVertices = function(axis) {
   };
   return verticesArray;
 };
-// RegularPolygon.prototype.fullyOverlaps = function(shape) {
-//   const vertices1 = this.getCartesianVertices();
-//   const vertices2 = shape.getCartesianVertices();
-//   if() {
-//     return true
-//   }
-//   return false
-// };
+RegularPolygon.prototype.overlapsOn = function(shape) {
+  const vertices1 = this.getCartesianVertices();
+  const vertices2 = shape.getCartesianVertices();
+  let overlaps = 0;
+  vertices1.forEach( vertex => vertices2.some( vert => {
+    if(vertex.equals(vert)) {
+      overlaps++;
+      };
+  }));
+  return overlaps;
+};
 
 RegularPolygon.prototype.drawOutline = function(context, outlineColor) {
   this.outlineColor = outlineColor;

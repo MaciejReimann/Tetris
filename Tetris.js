@@ -6,7 +6,7 @@ function Tetris_Square(mod, pivot) {
   Tetris.call(this, mod, pivot);
   this.name = 'square-type';
   this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot
-    {x: -0.5, y: 0.5}, {x: -0.5, y: -0.5}, {x: 0.5, y: -0.5}, {x: 0.5, y: 0.5}
+    {x: -.5, y: .5}, {x: -.5, y: -.5}, {x: .5, y: -.5}, {x: .5, y: .5}
   ];
 };
 Tetris_Square.prototype = Object.create(Tetris.prototype);
@@ -17,7 +17,7 @@ function Tetris_S(mod, pivot) {
   Tetris.call(this, mod, pivot);
   this.name = 's-type';
   this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot in local units
-    {x: -1, y: 0.5}, {x: 0, y: 0.5}, {x: 0, y: -0.5}, {x: 1, y: -0.5}
+    {x: -1.5, y: .5}, {x: -.5, y: .5}, {x: -.5, y: -.5}, {x:.5, y: -.5}
   ]
 }
 Tetris_S.prototype = Object.create(Tetris.prototype);
@@ -106,26 +106,47 @@ Tetris.prototype.staysOnCanvasWhen = function() {
     rotated: rotated,
   };
 };
-Tetris.prototype.collidesWith = function(callback) {
+Tetris.prototype.collidesWith = function(callback, direction) {
   const staticSquares = callback();
-  const staticVertices = staticSquares.map(square => square.getCartesianVertices())
-
-  const whenMovedDown = function() {
-    this.moveDown();
-    // const dynamicVertices = this.getCartesianVertices();
-    // dynamicVertices.forEach(dynamicVertex => staticVertices.find(static => static === dynamic))
-
-
-    // console.log(dynamicVertices)
-    console.log(staticVertices);
-    this.moveUp();
+  if(staticSquares.length === 0) {
     return false;
-  }.bind(this);
-
-  return {
-    whenMovedDown: whenMovedDown,
-
   };
+  function collides(items) {
+   return items.some(d_square => 
+         staticSquares.some(s_square => s_square.overlapsOn(d_square) === 4 )
+      );
+  };
+
+  if(direction === "down") {
+    this.moveDown();
+    if(collides( this.createSquares() )) {
+      this.moveUp();
+      return true;
+    } else {
+      this.moveUp();
+    };
+  } else if (direction === "right") {
+    this.moveRight();
+    if(collides( this.createSquares() )) {
+      this.moveLeft();
+      return true;
+    } else {
+      this.moveLeft();
+    };
+  } else if (direction === "left") {
+    this.moveLeft();
+    if(collides( this.createSquares() )) {
+      this.moveRight();
+      return true;
+    } else {
+      this.moveRight();
+    };
+  } else if (direction === "any") {
+    this.collidesWith(callback, "down");
+    this.collidesWith(callback, "right");
+    this.collidesWith(callback, "left");
+  };
+  return false;
 };
 
 // --------- TETRIS TRANSFORMATIONS ----------
