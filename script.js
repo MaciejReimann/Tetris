@@ -63,7 +63,7 @@ view.canvasConfig = (function(mod, width, height) { // takes in modular unit val
       }, 3, 70)
     },
   };
-})(10, 20, 35);
+})(10, 12, 35);
 
 
 
@@ -221,14 +221,8 @@ const game = (function() {
 
     if(gameEvent === "Cannot move down") {
       next();
-
-      largeCanvas.deleteRow(largeCanvas.checkWhichRowIsFull());
-      // largeCanvas.moveSquaresDown();
     }
   };
-  // function rowIsFull(){
-  //   largeCanvas.formRows()
-  // }
 
   function addIntervals() {
     timer.addInterval();
@@ -256,6 +250,7 @@ const game = (function() {
   function next() {
     nextTetris.shiftNames();
     largeCanvas.addSquares(fallingTetris.getSquares());
+    largeCanvas.deleteFullRowsAndDrop(largeCanvas.checkWhichRowIsFull());
     smallCanvasUpdate();    
     largeCanvasUpdate();
   };

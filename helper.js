@@ -19,6 +19,10 @@ function getMeanValue(array) {
   return array.reduce( (accumulator, currentValue, index) => (accumulator + currentValue) / (index + 1) );
 };
 
+function getLastItem(array) {
+  return array[array.length-1];
+};
+
 function flatten(array) {
   return array.reduce((acc, val) => acc.concat(val), []);
 };

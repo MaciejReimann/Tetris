@@ -64,7 +64,7 @@ Tetris.prototype.setRectangularRange = function(range) { // to be defined in tet
     this.range = range || {
       left: 0,
       up: -10,
-      right: 200, 
+      right: 120, 
       down: 350
     }
   };

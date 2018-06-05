@@ -48,9 +48,13 @@ Canvas.prototype.addSquares = function(squares) {
     if(this.squares[position_Y] === undefined) {
       this.squares[position_Y] = [];
     };
-    this.squares[position_Y].push(square)
-    // this.squares[position_Y] = square;
+    this.squares[position_Y].push(square);
   })
+};
+Canvas.prototype.updateArray = function() {
+  let squaresNow = this.getSquares();
+  this.squares = [];
+  this.addSquares(squaresNow);
 };
 
 Canvas.prototype.getSquares = function() {
@@ -58,10 +62,18 @@ Canvas.prototype.getSquares = function() {
   return this.allSquares;
 };
 
-Canvas.prototype.deleteRow = function(arr) {
-  if(arr.length > 0) {
-    arr.forEach(rowNumber => this.squares[rowNumber] = []) 
+Canvas.prototype.deleteFullRowsAndDrop = function(arr) {
+  if(arr.length > 0) {    
+    for (let i = arr.length - 1; i >= 0; i --) {
+      this.squares.splice( arr[i], 1);
+    };
+    this.updateArray();
+    for (let i = 0; i < arr.length; i ++) {
+      this.moveSquaresDown( 0, arr[i]);
+    };
+    this.updateArray();
   };
+  return arr;
 };
 
 Canvas.prototype.checkWhichRowIsFull = function() {
@@ -70,14 +82,18 @@ Canvas.prototype.checkWhichRowIsFull = function() {
   this.squares.forEach((row, index) => {
     if(row.length === widthInMod) {
       fullRows.push(index)
-    }
-  } )
-  console.log(fullRows);
+    };
+  });
   return fullRows;
 };
 
-Canvas.prototype.moveSquaresDown = function() {
-  this.squares.forEach(square => square.move('down', 10));
+Canvas.prototype.moveSquaresDown = function(start, end) {
+  let toBeMoved = this.squares.splice(start, end);
+  toBeMoved.forEach(row => row.forEach(
+    square => {square.move('down', this.modularUnit)
+    })
+  );
+  this.squares = toBeMoved.concat(this.squares);
 };
 
 Canvas.prototype.renderSquares = function() {
