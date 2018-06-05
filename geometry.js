@@ -35,6 +35,11 @@ RegularPolygon.prototype.getCartesianVertices = function(axis) {
   };
   return verticesArray;
 };
+RegularPolygon.prototype.move = function(dir, m) {
+  if(dir === 'down') {
+    this.center.y += m;
+  };
+};
 RegularPolygon.prototype.overlapsOn = function(shape) {
   const vertices1 = this.getCartesianVertices();
   const vertices2 = shape.getCartesianVertices();
@@ -77,7 +82,7 @@ RegularPolygon.prototype.drawFill = function(context, fillColor, outlineColor) {
 
 const Square = function(sideLength, center, angle) {
   this.sideLength = sideLength;
-  let r = Math.sqrt(2 * Math.pow(this.sideLength / 2, 2))
+  let r = Math.sqrt(2 * Math.pow(this.sideLength / 2, 2));
   RegularPolygon.call(this, 4, r, center, angle);
 };
 

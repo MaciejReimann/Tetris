@@ -40,8 +40,8 @@ view.canvasConfig = (function(mod, width, height) { // takes in modular unit val
     return arrayOfPoints;
   };
   return {
-    modularUnit: mod,
     largeCanvas: {
+      modularUnit: mod,
       width: largeWidth,
       height: largeHeight,
       parentElement: view.main,
@@ -52,6 +52,7 @@ view.canvasConfig = (function(mod, width, height) { // takes in modular unit val
       }]
     },
     smallCanvas: {
+      modularUnit: mod,
       width: smallWidth,
       height: smallHeight,
       parentElement: view.main,
@@ -62,7 +63,7 @@ view.canvasConfig = (function(mod, width, height) { // takes in modular unit val
       }, 3, 70)
     },
   };
-})(10, 40, 45);
+})(10, 20, 35);
 
 
 
@@ -74,7 +75,7 @@ view.main.insertBefore(view.smallCanvas.canvas, view.largeCanvas.canvas);
 
 
 
-const size = view.canvasConfig.modularUnit;
+const size = view.canvasConfig.largeCanvas.modularUnit;
 const centerOfCanvas = {x:200, y: 225}
 const sqr = new Square(size, centerOfCanvas, 45)
 const poly = new RegularPolygon(4, 20, centerOfCanvas, 45);
@@ -85,7 +86,7 @@ const sqr2 = new Square(size, {x: centerOfCanvas.x+10, y: centerOfCanvas.y}, 45)
 sqr2.drawOutline(view.largeCanvas.ctx);
 
 
-const tetrisFactory = new TetrisFactory(view.canvasConfig.modularUnit);
+const tetrisFactory = new TetrisFactory(view.canvasConfig.largeCanvas.modularUnit);
 const timer = new Timer(view.timer);
 
 // --------------------------------------------------------
@@ -129,7 +130,6 @@ const game = (function() {
       getInstances: getInstances,
       getFirstName: getFirstName,
     };
-
   })();
 
   const fallingTetris = (function() {
@@ -213,17 +213,22 @@ const game = (function() {
     };
   })();
 
-  function gameEventsHandler (gameEvent) {
+  function gameEventsHandler (gameEvent) {// all events managed here!!!!! <  tetris = fallingTetris.getInstance().moveRight() >
     // console.log(gameEvent);
     if(gameEvent === "position changed") {
       largeCanvas.render();
     }
 
     if(gameEvent === "Cannot move down") {
-      // console.log("cant move Down")
       next();
+
+      largeCanvas.deleteRow(largeCanvas.checkWhichRowIsFull());
+      // largeCanvas.moveSquaresDown();
     }
   };
+  // function rowIsFull(){
+  //   largeCanvas.formRows()
+  // }
 
   function addIntervals() {
     timer.addInterval();

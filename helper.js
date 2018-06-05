@@ -15,6 +15,10 @@ function getRandomItem(array) {
   return array[ Math.floor(Math.random() * array.length) ];
 };
 
+function getMeanValue(array) {
+  return array.reduce( (accumulator, currentValue, index) => (accumulator + currentValue) / (index + 1) );
+};
+
 function flatten(array) {
   return array.reduce((acc, val) => acc.concat(val), []);
 };

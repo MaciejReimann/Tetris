@@ -13,9 +13,9 @@ TetrisFactory.prototype.produce = function(type, point) { // type(string), start
     if (type === 'square-type') {
         return new Tetris_Square(this.modularUnit, point);
     } else if (type === 's-type') {
-        return new Tetris_S(this.modularUnit, point);
+        return new Tetris_Square(this.modularUnit, point);
     } else if (type === 'z-type') {
-        return new Tetris_Z(this.modularUnit, point);
+        return new Tetris_Square(this.modularUnit, point);
     }  
 };
 

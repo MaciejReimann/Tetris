@@ -2,6 +2,7 @@
 
 const Canvas = function(config) {
   this.config = config;
+  this.modularUnit = this.config.modularUnit;
   this.canvas = document.createElement('canvas');
   this.canvas.className = config.className;
   this.canvas.width = config.width;
@@ -42,12 +43,41 @@ Canvas.prototype.renderTetris = function() {
 };
 
 Canvas.prototype.addSquares = function(squares) {
-  this.squares.push(squares);
+  squares.forEach(square => {
+    let position_Y = (square.center.y + (this.modularUnit / 2)) / this.modularUnit;
+    if(this.squares[position_Y] === undefined) {
+      this.squares[position_Y] = [];
+    };
+    this.squares[position_Y].push(square)
+    // this.squares[position_Y] = square;
+  })
 };
 
 Canvas.prototype.getSquares = function() {
-  this.squares = flatten(this.squares);
-  return this.squares;
+  this.allSquares = flatten(this.squares);
+  return this.allSquares;
+};
+
+Canvas.prototype.deleteRow = function(arr) {
+  if(arr.length > 0) {
+    arr.forEach(rowNumber => this.squares[rowNumber] = []) 
+  };
+};
+
+Canvas.prototype.checkWhichRowIsFull = function() {
+  let widthInMod = this.canvas.width / this.modularUnit;
+  let fullRows = [];
+  this.squares.forEach((row, index) => {
+    if(row.length === widthInMod) {
+      fullRows.push(index)
+    }
+  } )
+  console.log(fullRows);
+  return fullRows;
+};
+
+Canvas.prototype.moveSquaresDown = function() {
+  this.squares.forEach(square => square.move('down', 10));
 };
 
 Canvas.prototype.renderSquares = function() {
