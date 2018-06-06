@@ -110,11 +110,11 @@ const game = (function() {
       return _currentInstances;
     };  
     function getFirstName() {
-      return _names[0]    
+      return _names[0];
     };
     return {
-      placeOnStart: placeOnStart,
       getInstances: getInstances,
+      placeOnStart: placeOnStart,      
       getFirstName: getFirstName,
     };
   })();
@@ -129,80 +129,85 @@ const game = (function() {
     };
     function _fallDown() {
       gameEventsHandler("Fall Down");
-    }
-
+    };
     function placeOnStart(name) {   
       _currentInstance = tetrisFactory.produce(name, _getStartPoint());
     };
     function getInstance() {
       return _currentInstance;            
-    };
-    function getSquares() {
-       return _currentInstance.createSquares();            
     };   
     function addInterval() {
       _interval = setInterval(_fallDown, _fallingRate);
-    }
+    };
     function removeInterval() {
       clearInterval(_interval);
-    }
-
+    };
     return {
-      addInterval:addInterval,
-      removeInterval:removeInterval,
-      placeOnStart: placeOnStart,
-      getSquares: getSquares,
       getInstance: getInstance,
+      placeOnStart: placeOnStart,
+      addInterval:addInterval,
+      removeInterval:removeInterval,     
     };
   })();
 
   function gameEventsHandler (event) {
-    console.log(event)
     const tetrisFalling = fallingTetris.getInstance();
     function _tetrisOnCanvas() {
       return largeCanvas.getSquares();
     };
-    if(event === 'position changed') {
+
+    if(event === 'Position Changed') {
       largeCanvas.render();
       return;
-    } else if(event.key === 'ArrowDown' || event === "Fall Down") {
+    } else if(event === 'Cannot Move Down') {
+      next();
+    } else if (gameStatus === 'welcome' && event.code === "Enter") { // START!
+      largeCanvasUpdate(); // has to be updated before smallCanvas to get the first next before it switches
+      smallCanvasUpdate();
+      play();
+      return;
+    } else if (gameStatus === 'playing' && event.code === "Space") { // PAUSE!
+      gameStatus = 'paused';
+      showMessage('resume');
+      removeIntervals();
+      return;
+    } else if (gameStatus === 'paused' && event.code === "Space") { // RESUME!
+      play();
+      return;
+    } else if(event.code === 'ArrowDown' || event === "Fall Down") {
         if(tetrisFalling.staysOnCanvasWhen().movedDown()  
           && !tetrisFalling.collidesWith(_tetrisOnCanvas, "down")
-          ) {
+        ) {
           tetrisFalling.moveDown();
         } else {
-          gameEventsHandler("Cannot move down")
+          gameEventsHandler("Cannot Move Down")
         }
-    } else if(event.key === 'ArrowRight') {
+    } else if(event.code === 'ArrowRight') {
       if (tetrisFalling.staysOnCanvasWhen().movedRight()
         && !tetrisFalling.collidesWith(_tetrisOnCanvas, "right")
-        ) {
+      ) {
         tetrisFalling.moveRight();
       }
-    } else if(event.key === 'ArrowLeft') {
+    } else if(event.code === 'ArrowLeft') {
       if (tetrisFalling.staysOnCanvasWhen().movedLeft()
         && !tetrisFalling.collidesWith(_tetrisOnCanvas, "left")
-        ) {
+      ) {
         tetrisFalling.moveLeft();
       }
-    } else if(event.key === 'z'|| event.key === 'Z') {
+    } else if(event.code === 'KeyZ') {
       if(tetrisFalling.staysOnCanvasWhen().rotated('rotateLeft', 'rotateRight')
         && !tetrisFalling.collidesWith(_tetrisOnCanvas, "any")
-        ) {
+      ) {
         tetrisFalling.rotateLeft();
       }
-    } else if(event.key === 'a'|| event.key === 'A') {
+    } else if(event.code === 'KeyA'|| event.code === 'A') {
       if(tetrisFalling.staysOnCanvasWhen().rotated('rotateRight', 'rotateLeft')
         && !tetrisFalling.collidesWith(_tetrisOnCanvas, "any")
         ) {
         tetrisFalling.rotateRight();
       }
     };
-    gameEventsHandler('position changed') 
-
-    if(event === 'Cannot move down') {
-      next();
-    }
+    gameEventsHandler('Position Changed')    
   };
 
   function addIntervals() {
@@ -223,44 +228,23 @@ const game = (function() {
     largeCanvas.updateTetris(fallingTetris.getInstance());
     largeCanvas.render();
   };
-
   function next() {
-    largeCanvas.addSquares(fallingTetris.getSquares());
+    largeCanvas.addSquares(fallingTetris.getInstance().createSquares());
     largeCanvas.deleteFullRowsAndDrop(largeCanvas.checkWhichRowIsFull());       
     largeCanvasUpdate();
     smallCanvasUpdate(); 
   };
-
-
-  function gameStatusHandler(event) {
-    if (gameStatus === 'welcome' && event.code === "Enter") { // START!
-      largeCanvasUpdate(); // has to be updated before smallCanvas to get the first next before it switches
-      smallCanvasUpdate();
-      play();
-    } else if (gameStatus === 'playing' && event.code === "Space") { // PAUSE!
-      gameStatus = 'paused';
-      showMessage('resume');
-      removeIntervals();
-      window.removeEventListener('keydown', gameEventsHandler);
-    } else if (gameStatus === 'paused' && event.code === "Space") { // RESUME!
-      play();
-    };
-  };
-
   function play() {
     gameStatus = 'playing';
     showMessage('pause');
     addIntervals();
-    // window.addEventListener('keydown', fallingTetris.positionHandler);
-    window.addEventListener('keydown', gameEventsHandler); 
   };
-
   function welcome() {
     showMessage('start');
     timer.append();
     score.append();
     smallCanvasUpdate();
-    window.addEventListener('keydown', gameStatusHandler);
+    window.addEventListener('keydown', gameEventsHandler);
   };
   // game object has only one method which is called with an IIFE
   return {
