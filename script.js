@@ -53,12 +53,18 @@ view.main.insertBefore(view.smallCanvas.canvas, view.largeCanvas.canvas);
 
 
 const tetrisFactory = new TetrisFactory(view.canvasConfig.largeCanvas.modularUnit);
-const timer = new Timer(view.timer);
+const timer = new Timer(view.timer, 500);
 
 const score = new Score(view.score, 0, calculateScore);
-function calculateScore(currentValue, strike) {
-
-}
+function calculateScore(n) {
+  if (n.length > 0) {
+    return n.reduce( (accumulator, currentValue) => accumulator + currentValue );
+  } else if(n.length === 0) {
+    return 1;
+  } else {
+    return 0;
+  };
+};
 
 // --------------------------------------------------------
 // --------------------------------------------------------
@@ -161,6 +167,7 @@ const game = (function() {
       return;
     } else if(event === 'Cannot Move Down') {
       next();
+      return;
     } else if (gameStatus === 'welcome' && event.code === "Enter") { // START!
       largeCanvasUpdate(); // has to be updated before smallCanvas to get the first next before it switches
       smallCanvasUpdate();
@@ -230,9 +237,10 @@ const game = (function() {
   };
   function next() {
     largeCanvas.addSquares(fallingTetris.getInstance().createSquares());
-    largeCanvas.deleteFullRowsAndDrop(largeCanvas.checkWhichRowIsFull());       
+    score.increment(largeCanvas.deleteFullRowsAndDrop(largeCanvas.checkWhichRowIsFull()));
+    score.render();
     largeCanvasUpdate();
-    smallCanvasUpdate(); 
+    smallCanvasUpdate();    
   };
   function play() {
     gameStatus = 'playing';

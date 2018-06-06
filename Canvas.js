@@ -1,6 +1,6 @@
 
 
-const Canvas = function(config) {
+const Canvas = function(config, callback) {
   this.config = config;
   this.modularUnit = this.config.modularUnit;
   this.canvas = document.createElement('canvas');

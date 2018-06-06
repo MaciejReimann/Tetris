@@ -20,7 +20,7 @@ function getMeanValue(array) {
 };
 
 function getLastItem(array) {
-  return array[array.length-1];
+  return array[array.length - 1];
 };
 
 function flatten(array) {

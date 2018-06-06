@@ -5,13 +5,12 @@ const Score = function (parentElement, defaultValue, incrementCallback) {
   this.parentElement = parentElement;
   this.defaulValue = defaultValue;
   this.currentValue = this.defaulValue;
-  this.displayValue = this.currentValue || this.defaulValue;
-  this.strike = 0;
+  // this.displayValue = this.defaulValue || this.currentValue;
   this.incrementCallback = incrementCallback;
 };
 
 Score.prototype.append = function() {
-  this.div.textContent = this.displayValue;
+  this.div.textContent = this.currentValue;
   this.parentElement.appendChild(this.div);
 };
 
@@ -20,9 +19,8 @@ Score.prototype.render = function() {
   this.append();
 };
 
-Score.prototype.increment = function(callback) {
-  this.currentValue = this.incrementCallback(this.currentValue, this.strike)
-  this.render();
+Score.prototype.increment = function(n) {
+  this.currentValue += this.incrementCallback(n);
 };
 
 

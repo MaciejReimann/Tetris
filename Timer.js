@@ -1,17 +1,17 @@
 
 
 const Timer = function (parentElement) {
-  this.interval;
-  this.rate = 1000;
+  this.div = document.createElement('div');
   this.parentElement = parentElement;
-  this.timerDiv = document.createElement('div');
+  this.defaultRate = 1000;
+  this.currentRate = this.defaultRate;
+  this.interval;
   this.timeInSeconds = 0;
-  this.timerDiv.textContent = this.timeInSeconds;
 };
 
 Timer.prototype.append = function() {
-  this.timerDiv.textContent = this.timeInSeconds;
-  this.parentElement.appendChild(this.timerDiv);
+  this.div.textContent = this.timeInSeconds;
+  this.parentElement.appendChild(this.div);
 };
 
 Timer.prototype.render = function() {
@@ -25,10 +25,10 @@ Timer.prototype.renderIncremented = function() {
 };
 
 Timer.prototype.addInterval = function() {
-  this.interval = setInterval(this.renderIncremented.bind(this), this.rate);
+  this.interval = setInterval(this.renderIncremented.bind(this), this.currentRate);
 };
 
 Timer.prototype.removeInterval = function() {
-  clearInterval(this.interval);;
+  clearInterval(this.interval);
 };
 
