@@ -181,7 +181,7 @@ const game = (function() {
     } else if (gameStatus === 'paused' && event.code === "Space") { // RESUME!
       play();
       return;
-    } else if(event.code === 'ArrowDown' || event === "Fall Down") {
+    } else if(gameStatus === 'playing' && event.code === 'ArrowDown' || event === "Fall Down") {
         if(tetrisFalling.staysOnCanvasWhen().movedDown()  
           && !tetrisFalling.collidesWith(_tetrisOnCanvas, "down")
         ) {
@@ -189,25 +189,25 @@ const game = (function() {
         } else {
           gameEventsHandler("Cannot Move Down")
         }
-    } else if(event.code === 'ArrowRight') {
+    } else if(gameStatus === 'playing' && event.code === 'ArrowRight') {
       if (tetrisFalling.staysOnCanvasWhen().movedRight()
         && !tetrisFalling.collidesWith(_tetrisOnCanvas, "right")
       ) {
         tetrisFalling.moveRight();
       }
-    } else if(event.code === 'ArrowLeft') {
+    } else if(gameStatus === 'playing' && event.code === 'ArrowLeft') {
       if (tetrisFalling.staysOnCanvasWhen().movedLeft()
         && !tetrisFalling.collidesWith(_tetrisOnCanvas, "left")
       ) {
         tetrisFalling.moveLeft();
       }
-    } else if(event.code === 'KeyZ') {
+    } else if(gameStatus === 'playing' && event.code === 'KeyZ') {
       if(tetrisFalling.staysOnCanvasWhen().rotated('rotateLeft', 'rotateRight')
         && !tetrisFalling.collidesWith(_tetrisOnCanvas, "any")
       ) {
         tetrisFalling.rotateLeft();
       }
-    } else if(event.code === 'KeyA'|| event.code === 'A') {
+    } else if(gameStatus === 'playing' && event.code === 'KeyA'|| event.code === 'A') {
       if(tetrisFalling.staysOnCanvasWhen().rotated('rotateRight', 'rotateLeft')
         && !tetrisFalling.collidesWith(_tetrisOnCanvas, "any")
         ) {

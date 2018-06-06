@@ -12,6 +12,44 @@ function Tetris_Square(mod, pivot) {
 Tetris_Square.prototype = Object.create(Tetris.prototype);
 Tetris_Square.prototype.constructor = Tetris_Square;
 
+function Tetris_I(mod, pivot) {
+  Tetris.call(this, mod, pivot);
+  this.name = 'i-type';
+  this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot
+    {x: -1.5, y: .5}, {x: -.5, y: .5}, {x: .5, y: .5}, {x: 1.5, y: .5}
+  ];
+};
+Tetris_I.prototype = Object.create(Tetris.prototype);
+Tetris_I.prototype.constructor = Tetris_I;
+
+function Tetris_L(mod, pivot) {
+  Tetris.call(this, mod, pivot);
+  this.name = 'l-type';
+  this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot
+    {x: -.5, y: .5}, {x: -.5, y: -.5}, {x: .5, y: .5}, {x: 1.5, y: .5}
+  ];
+};
+Tetris_L.prototype = Object.create(Tetris.prototype);
+Tetris_L.prototype.constructor = Tetris_L;
+
+function Tetris_L_Mirrored(mod, pivot) {
+  Tetris.call(this, mod, pivot);
+  Tetris_L.call(this, mod, pivot);
+  this.name = 'l-type-mirrored';
+  this.squareCenters = mirrorByY_Axis(this.squareCenters);
+};
+Tetris_L_Mirrored.prototype = Object.create(Tetris.prototype);
+Tetris_L_Mirrored.prototype.constructor = Tetris_L_Mirrored;
+
+function Tetris_M(mod, pivot) {
+  Tetris.call(this, mod, pivot);
+  this.name = 'm-type';
+  this.squareCenters = [
+    {x: -.5, y: .5}, {x: .5, y: .5}, {x: .5, y: -.5}, {x: 1.5, y: .5}
+  ];
+};
+Tetris_M.prototype = Object.create(Tetris.prototype);
+Tetris_M.prototype.constructor = Tetris_M;
 
 function Tetris_S(mod, pivot) {
   Tetris.call(this, mod, pivot);
