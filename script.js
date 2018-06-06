@@ -92,28 +92,25 @@ const game = (function() {
   // })(); 
 
   const nextTetris = (function() { 
-    let currentInstances; // populated by Tetris instances with the canters stored in _startPoints;
-    const names = []; // populated by 3 possible Tetris types names; first name from the array is passed  to fallingTetris;
-    const center = new CartesianVertex(smallCanvas.config.width / 2, smallCanvas.config.height / 2)
-    const _startPoints = generateStartPoints(center, 3, 70);
+    let _currentInstances; // populated by Tetris instances with the canters stored in _startPoints;
+    const _center = new CartesianVertex(smallCanvas.config.width / 2, smallCanvas.config.height / 2)
+    const _points = generateStartPoints(_center, 3, 70);
+    const _names = _points.map(point => tetrisFactory.getRandomName());
 
-    const generateNames = function() {
-      _startPoints.forEach((point) => names.push(tetrisFactory.getRandomName()))
-    }();
     const placeOnStart = function() {
-      currentInstances = _startPoints.map( 
-        (point, i = point[index] ) => tetrisFactory.produce(names[ i ], point) 
+      _currentInstances = _points.map( 
+        (point, i = point[index] ) => tetrisFactory.produce(_names[ i ], point) 
       );
     };
     function getInstances() {
-      return currentInstances;
+      return _currentInstances;
     };
     function shiftNames() {
-      names.push(tetrisFactory.getRandomName());
-      names.shift();
+      _names.push(tetrisFactory.getRandomName());
+      _names.shift();
     };
     function getFirstName() {
-      return names[0]    
+      return _names[0]    
     };
     return {
       shiftNames: shiftNames,
