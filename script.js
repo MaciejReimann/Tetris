@@ -26,7 +26,7 @@ view.showMessage = function(shortMessage) {
 
 // --- CANVAS SETUP ----
 
-view.canvasConfig = (function(mod, width, height) { // takes in modular unit value and canvas dimensions expressed in this value
+view.canvasConfig = (function(mod, width, height) { 
   const largeWidth = width * mod;
   const largeHeight = height * mod;
   return {
@@ -123,17 +123,6 @@ const game = (function() {
     const _fallingRate = 500;
     let _interval;
     let _currentInstance;
-    let _currentName;
-
-    function _getCurrentName() {
-      if(!_currentName){
-       throw new Error('Falling Tetris currentName is not set!')
-      };
-      return _currentName;
-    };
-    function setCurrentName(name) {
-       _currentName = name;
-    };
 
     function _getStartPoint() {
       return new CartesianVertex(largeCanvas.config.width / 2, 0)
@@ -145,8 +134,8 @@ const game = (function() {
     function _fallDown() {
       positionHandler("Move Down");
     }
-    function placeOnStart() {   
-      _currentInstance = tetrisFactory.produce(_getCurrentName(), _getStartPoint());
+    function placeOnStart(name) {   
+      _currentInstance = tetrisFactory.produce(name, _getStartPoint());
     };
     function getInstance() {
       return _currentInstance;            
@@ -200,7 +189,6 @@ const game = (function() {
     };
 
     return {
-      setCurrentName: setCurrentName,
       addInterval:addInterval,
       removeInterval:removeInterval,
       positionHandler: positionHandler,
@@ -210,8 +198,9 @@ const game = (function() {
     };
   })();
 
-  function gameEventsHandler (gameEvent) {// all events managed here!!!!! <  tetris = fallingTetris.getInstance().moveRight() >
-    // console.log(gameEvent);
+  function gameEventsHandler (gameEvent) {
+  // all events managed here!!!!! <  tetris = fallingTetris.getInstance().moveRight() >
+
     if(gameEvent === "position changed") {
       largeCanvas.render();
     }
@@ -235,8 +224,7 @@ const game = (function() {
     smallCanvas.render();
   };
   function largeCanvasUpdate() {
-    fallingTetris.setCurrentName(nextTetris.getFirstName())
-    fallingTetris.placeOnStart();
+    fallingTetris.placeOnStart(nextTetris.getFirstName());
     largeCanvas.updateTetris(fallingTetris.getInstance());
     largeCanvas.render();
   };
