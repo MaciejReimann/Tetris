@@ -59,18 +59,16 @@ Tetris.prototype.drawFill = function(canvas) { // this function is called as Can
   this.canvas = canvas;
   this.createSquares().forEach((square) => square.drawFill(this.canvas.ctx));
 };
-Tetris.prototype.setRectangularRange = function(range) { // to be defined in tetris factory 
-  if(!range) {
-    this.range = range || {
-      left: 0,
-      up: -10,
-      right: 120, 
-      down: 350
-    }
+Tetris.prototype.setRectangularRange = function(canvas) { // to be defined in tetris factory
+  this.range = {
+    left: 0,
+    up: -10,
+    right: canvas.config.width, 
+    down: canvas.config.height
   };
 };
 Tetris.prototype.staysOnCanvasWhen = function() {
-  this.setRectangularRange();
+  this.setRectangularRange(this.canvas);
   const xVertices = function() {
     return this.createSquares().map( (square)  => square.getCartesianVertices('x'));
   }.bind(this);

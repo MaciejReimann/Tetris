@@ -45,7 +45,7 @@ view.canvasConfig = (function(mod, width, height) { // takes in modular unit val
       className: 'small-canvas',
     },
   };
-})(10, 12, 35);
+})(15, 20, 30);
 
 view.largeCanvas = new Canvas(view.canvasConfig.largeCanvas);
 view.smallCanvas = new Canvas(view.canvasConfig.smallCanvas);
@@ -56,7 +56,7 @@ const tetrisFactory = new TetrisFactory(view.canvasConfig.largeCanvas.modularUni
 const timer = new Timer(view.timer);
 
 const score = new Score(view.score, 0, calculateScore);
-function calculateScore(currentValue, strike){
+function calculateScore(currentValue, strike) {
 
 }
 
@@ -73,23 +73,23 @@ const game = (function() {
   const largeCanvas = view.largeCanvas;
   function generateStartPoints(start, amount, offsetX) {
     let arrayOfPoints = [start];
-    for (let i = 1; i < amount; i++) {
-      arrayOfPoints.push(new CartesianVertex(start.x + offsetX, start.y));
+    for (let i = 1; i <= amount; i++) {
+      arrayOfPoints.push(new CartesianVertex(arrayOfPoints[i-1].x + offsetX, start.y));
     };
     return arrayOfPoints;
   };
 
-  const startTetris = (function() {
-    const center = new CartesianVertex(largeCanvas.config.width / 2, largeCanvas.config.height / 2)
-    const _startPoints = generateStartPoints(center, 3, 70);
+  // const startTetris = (function() {
+  //   const center = new CartesianVertex(largeCanvas.config.width / 2, largeCanvas.config.height / 2)
+  //   const _startPoints = generateStartPoints(center, 3, 70);
 
-    function placeOnStart() {
+  //   function placeOnStart() {
 
-    };
-    return {
-      placeOnStart: placeOnStart,
-    };
-  })(); 
+  //   };
+  //   return {
+  //     placeOnStart: placeOnStart,
+  //   };
+  // })(); 
 
   const nextTetris = (function() { 
     let currentInstances; // populated by Tetris instances with the canters stored in _startPoints;
@@ -275,8 +275,9 @@ const game = (function() {
   };
   function welcome() {
     showMessage('start');
-    smallCanvasUpdate();
     timer.append();
+    score.append();
+    smallCanvasUpdate();
     window.addEventListener('keydown', gameStatusHandler);
   };
 
