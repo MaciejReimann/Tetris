@@ -123,25 +123,34 @@ const game = (function() {
   const fallingTetris = (function() {
     const _fallingRate = 500;
     let _interval;
-    let currentInstance;
+    let _currentInstance;
+    let _currentName;
 
-    function _startPoint() {
+    function _getCurrentName() {
+      if(!_currentName){
+       throw new Error('Falling Tetris currentName is not set!')
+      };
+      return _currentName;
+    };
+    function setCurrentName(name) {
+       _currentName = name;
+    };
+
+    function _getStartPoint() {
       return new CartesianVertex(largeCanvas.config.width / 2, 0)
     };
     function _tetrisOnCanvas() {
       return largeCanvas.getSquares();
     };
-    function _nameOfFirst() {
-      return nextTetris.getFirstName();
-    };
+
     function _fallDown() {
       positionHandler("Move Down");
     }
     function placeOnStart() {   
-      currentInstance = tetrisFactory.produce(_nameOfFirst(), _startPoint());
+      _currentInstance = tetrisFactory.produce(_getCurrentName(), _getStartPoint());
     };
     function getInstance() {
-      return currentInstance;            
+      return _currentInstance;            
     };
     function getSquares() {
        return currentInstance.createSquares();            
@@ -192,6 +201,7 @@ const game = (function() {
     };
 
     return {
+      setCurrentName: setCurrentName,
       addInterval:addInterval,
       removeInterval:removeInterval,
       positionHandler: positionHandler,
@@ -230,6 +240,7 @@ const game = (function() {
   };
 
   function largeCanvasUpdate() {
+    fallingTetris.setCurrentName(nextTetris.getFirstName())
     fallingTetris.placeOnStart();
     largeCanvas.updateTetris(fallingTetris.getInstance());
     largeCanvas.render();
