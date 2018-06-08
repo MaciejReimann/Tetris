@@ -10,7 +10,7 @@ const Timer = function (parentElement) {
 };
 
 Timer.prototype.append = function() {
-  this.div.textContent = this.timeInSeconds;
+  this.div.textContent = this.format();
   this.parentElement.appendChild(this.div);
 };
 
@@ -18,9 +18,12 @@ Timer.prototype.render = function() {
   clear(this.parentElement);
   this.append();
 };
+Timer.prototype.format = function() {
+  return convertToHrMinSec(this.timeInSeconds);
+};
 
 Timer.prototype.renderIncremented = function() {
-  this.timeInSeconds++;
+  this.timeInSeconds++;  
   this.render();
 };
 

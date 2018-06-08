@@ -8,6 +8,23 @@ function clear(parentElement) {
   }
 };
 
+// --- TIME FORMAT ----
+
+function convertToHrMinSec(timeInSeconds) {
+  let hours = format_2Digits(Math.floor(timeInSeconds / 3600));
+  let minutes = format_2Digits(Math.floor((timeInSeconds - hours * 3600) / 60));
+  let seconds = format_2Digits(timeInSeconds % 60);
+  return `${hours}:${minutes}:${seconds}`;
+};
+
+function format_2Digits(number) {
+  let numberString;
+  if (number < 9) {
+    return '0'+ number;
+  };
+  return number.toString();
+};
+
 
 // ----- ARRAY TRANSFORMATION FUNCTIONS -----
 
