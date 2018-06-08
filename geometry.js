@@ -1,7 +1,7 @@
 
 
 
-const RegularPolygon = function(n, r, center, angle) {
+const RegularPolygon = function(n, r, center, angle, fillColor) {
   if(!n || !r) { throw new Error("Number of sides and radius must be specified") };
   if(!angle) { angle = 0 };
   if(!center) { center = {x: 0, y: 0} };
@@ -9,7 +9,9 @@ const RegularPolygon = function(n, r, center, angle) {
   this.radius = r;
   this.center = center;
   this.angle = angle;
-  this.defaultColor = 'darkgrey';
+  // this.defaultColor = 'darkgrey';
+  this.fillColor = fillColor;
+  this.outlineColor = "black"
 }
 RegularPolygon.prototype.getCartesianVertices = function(axis) {
   let verticesArray = [];
@@ -52,8 +54,7 @@ RegularPolygon.prototype.overlapsOn = function(shape) {
   return overlaps;
 };
 
-RegularPolygon.prototype.drawOutline = function(context, outlineColor) {
-  this.outlineColor = outlineColor;
+RegularPolygon.prototype.drawOutline = function(context) {
   if(context) {
     this.ctx = context;
   } else {
@@ -67,23 +68,24 @@ RegularPolygon.prototype.drawOutline = function(context, outlineColor) {
   };
   this.ctx.closePath();
   this.ctx.stroke(); // line width to be defined in the config object
+  this.ctx.lineWidth = 1;
+  this.ctx.strokeStyle = this.outlineColor;
 };
-RegularPolygon.prototype.drawFill = function(context, fillColor, outlineColor) {
-  this.fillColor = fillColor;
+RegularPolygon.prototype.drawFill = function(context) {
   if(context) {
     this.ctx = context;
   } else {
     throw new Error("No context defined!")
   }
-  this.drawOutline(context, outlineColor);
+  this.drawOutline(context);
   this.ctx.fillStyle = this.fillColor || this.defaultColor;
   this.ctx.fill();
 };
 
-const Square = function(sideLength, center, angle) {
+const Square = function(sideLength, center, angle, fillColor) {
   this.sideLength = sideLength;
   let r = Math.sqrt(2 * Math.pow(this.sideLength / 2, 2));
-  RegularPolygon.call(this, 4, r, center, angle);
+  RegularPolygon.call(this, 4, r, center, angle, fillColor);
 };
 
 Square.prototype = Object.create(RegularPolygon.prototype); 

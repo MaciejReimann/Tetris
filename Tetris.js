@@ -2,8 +2,8 @@
 
  // --- POSSIBLE TETRIS SHAPES CONSTRUCTORS ---
   
-function Tetris_Square(mod, pivot) {
-  Tetris.call(this, mod, pivot);
+function Tetris_Square(mod, pivot, fillColor) {
+  Tetris.call(this, mod, pivot, fillColor);
   this.name = 'square-type';
   this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot
     {x: -.5, y: .5}, {x: -.5, y: -.5}, {x: .5, y: -.5}, {x: .5, y: .5}
@@ -12,8 +12,8 @@ function Tetris_Square(mod, pivot) {
 Tetris_Square.prototype = Object.create(Tetris.prototype);
 Tetris_Square.prototype.constructor = Tetris_Square;
 
-function Tetris_I(mod, pivot) {
-  Tetris.call(this, mod, pivot);
+function Tetris_I(mod, pivot, fillColor) {
+  Tetris.call(this, mod, pivot, fillColor);
   this.name = 'i-type';
   this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot
     {x: -1.5, y: .5}, {x: -.5, y: .5}, {x: .5, y: .5}, {x: 1.5, y: .5}
@@ -22,8 +22,8 @@ function Tetris_I(mod, pivot) {
 Tetris_I.prototype = Object.create(Tetris.prototype);
 Tetris_I.prototype.constructor = Tetris_I;
 
-function Tetris_L(mod, pivot) {
-  Tetris.call(this, mod, pivot);
+function Tetris_L(mod, pivot, fillColor) {
+  Tetris.call(this, mod, pivot, fillColor);
   this.name = 'l-type';
   this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot
     {x: -.5, y: .5}, {x: -.5, y: -.5}, {x: .5, y: .5}, {x: 1.5, y: .5}
@@ -32,17 +32,17 @@ function Tetris_L(mod, pivot) {
 Tetris_L.prototype = Object.create(Tetris.prototype);
 Tetris_L.prototype.constructor = Tetris_L;
 
-function Tetris_L_Mirrored(mod, pivot) {
-  Tetris.call(this, mod, pivot);
-  Tetris_L.call(this, mod, pivot);
+function Tetris_L_Mirrored(mod, pivot, fillColor) {
+  Tetris.call(this, mod, pivot, fillColor);
+  Tetris_L.call(this, mod, pivot, fillColor);
   this.name = 'l-type-mirrored';
   this.squareCenters = mirrorByY_Axis(this.squareCenters);
 };
 Tetris_L_Mirrored.prototype = Object.create(Tetris.prototype);
 Tetris_L_Mirrored.prototype.constructor = Tetris_L_Mirrored;
 
-function Tetris_M(mod, pivot) {
-  Tetris.call(this, mod, pivot);
+function Tetris_M(mod, pivot, fillColor) {
+  Tetris.call(this, mod, pivot, fillColor);
   this.name = 'm-type';
   this.squareCenters = [
     {x: -.5, y: .5}, {x: .5, y: .5}, {x: .5, y: -.5}, {x: 1.5, y: .5}
@@ -51,8 +51,8 @@ function Tetris_M(mod, pivot) {
 Tetris_M.prototype = Object.create(Tetris.prototype);
 Tetris_M.prototype.constructor = Tetris_M;
 
-function Tetris_S(mod, pivot) {
-  Tetris.call(this, mod, pivot);
+function Tetris_S(mod, pivot, fillColor) {
+  Tetris.call(this, mod, pivot, fillColor);
   this.name = 's-type';
   this.squareCenters = [ // position of the Square.center in relation to Tetris.pivot in local units
     {x: -1.5, y: .5}, {x: -.5, y: .5}, {x: -.5, y: -.5}, {x:.5, y: -.5}
@@ -62,9 +62,9 @@ Tetris_S.prototype = Object.create(Tetris.prototype);
 Tetris_S.prototype.constructor = Tetris_S;
 
 
-function Tetris_Z(mod, pivot) {
-  Tetris.call(this, mod, pivot);
-  Tetris_S.call(this, mod, pivot);
+function Tetris_Z(mod, pivot, fillColor) {
+  Tetris.call(this, mod, pivot, fillColor);
+  Tetris_S.call(this, mod, pivot, fillColor);
   this.name = 'z-type';
   this.squareCenters = mirrorByY_Axis(this.squareCenters);
 }
@@ -74,11 +74,13 @@ Tetris_Z.prototype.constructor = Tetris_Z;
 
 // --------- MAIN TETRIS CONSTRUCTOR ---------
 
-function Tetris(mod, pivot) { // pivot = { x: x, y: y} in global units
+function Tetris(mod, pivot, fillColor) { // pivot = { x: x, y: y} in global units
   // this.start = 
   this.mod = mod;
   this.pivot = pivot; 
   this.angle = 0;
+  this.outlineColor = "white";
+  this.fillColor = fillColor;
 };
 
 Tetris.prototype.getGlobalSquareCenters = function() {
@@ -88,9 +90,8 @@ Tetris.prototype.getCartesianVertices = function() {
   return this.createSquares().map( square => square.getCartesianVertices() );
 };
 Tetris.prototype.createSquares = function() {
-  return this.getGlobalSquareCenters().map( 
-    (point) => new Square(this.mod, point, this.angle + 45) 
-    );
+  return this.getGlobalSquareCenters().map(
+    (point, index) => new Square(this.mod, point, this.angle + 45, this.fillColor[index] ));
 };
 
 Tetris.prototype.drawFill = function(canvas) { // this function is called as Canvas method, where canvas.ctx is passed;

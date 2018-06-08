@@ -52,7 +52,12 @@ view.smallCanvas = new Canvas(view.canvasConfig.smallCanvas);
 view.main.insertBefore(view.smallCanvas.canvas, view.largeCanvas.canvas);
 
 
-const tetrisFactory = new TetrisFactory(view.canvasConfig.largeCanvas.modularUnit);
+const tetrisFactory = new TetrisFactory(view.canvasConfig.largeCanvas.modularUnit, colorGenerator);
+function colorGenerator() {
+  let fourColors = ["pink", "blue", "red", "magenta"]
+  return fourColors;
+};
+
 const timer = new Timer(view.timer, 500);
 
 const score = new Score(view.score, 0, calculateScore);
