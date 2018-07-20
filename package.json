@@ -1,0 +1,23 @@
+{
+  "name": "tetris",
+  "version": "1.0.0",
+  "description": "TetrisGame",
+  "main": "script.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MaciejReimann/Tetris.git"
+  },
+  "author": "Maciej Reimann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MaciejReimann/Tetris/issues"
+  },
+  "homepage": "https://github.com/MaciejReimann/Tetris#readme",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}

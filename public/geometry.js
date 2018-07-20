@@ -85,7 +85,7 @@ RegularPolygon.prototype.drawFill = function(context) {
 const Square = function(sideLength, center, angle, fillColor) {
   this.sideLength = sideLength;
   let r = Math.sqrt(2 * Math.pow(this.sideLength / 2, 2));
-  RegularPolygon.call(this, 4, r, center, angle, fillColor);
+  RegularPolygon.call(this, 4, r, center, angle, fillColor  );
 };
 
 Square.prototype = Object.create(RegularPolygon.prototype); 
