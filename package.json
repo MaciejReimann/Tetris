@@ -1,11 +1,12 @@
 {
   "name": "tetris",
-  "version": "1.0.0",
-  "description": "TetrisGame",
+  "version": "2.0.0",
+  "description": "Tetris Game",
   "main": "server.js",
   "scripts": {
+    "server": "nodemon server.js",
     "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "set NODE_ENV=development && npm run server"
   },
   "repository": {
     "type": "git",
@@ -19,5 +20,8 @@
   "homepage": "https://github.com/MaciejReimann/Tetris#readme",
   "dependencies": {
     "express": "^4.16.3"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.4"
   }
 }
