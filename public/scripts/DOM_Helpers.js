@@ -1,3 +1,4 @@
+
 const createElement = element => document.createElement(element);
 const changeClass = element => className => {
   element.className = className;
