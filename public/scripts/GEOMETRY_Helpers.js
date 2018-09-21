@@ -4,10 +4,14 @@ const sqr = n => Math.pow(n, 2);
 
 const merge = obj1 => obj2 => Object.assign({}, obj1, obj2);
 
-
 const addCoords = point1 => point2 => merge({})({
-  x: point1.x +  point2.x,
-  y: point1.y +  point2.y
+  x: point1.x + point2.x,
+  y: point1.y + point2.y
+})
+
+const diffCoords = point1 => point2 => merge({})({
+  x: point1.x - point2.x,
+  y: point1.y - point2.y
 })
 
 const multiplyCoords = point => mult => merge({})({
