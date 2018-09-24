@@ -4,8 +4,9 @@ const RIGHT = { x: 1, y: 0 };
 const DOWN = { x: 0, y: 1 };
 const LEFT = { x:-1, y: 0 };
 const DIRECTIONS = { RIGHT, DOWN, LEFT }
-const X = "X";
-const Y = "Y";
+const X = "x";
+const Y = "y";
+const AXES = { X, Y }
 
 // ACTION TYPES
 const START = 'START';

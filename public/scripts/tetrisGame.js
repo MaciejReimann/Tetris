@@ -24,7 +24,10 @@ const gameReducer = (state = initialState, action) => {
       const nextVertices = vertices.map(square => addCoordsToArrayOfPoints(square)(move));
       const nextPivot = addCoords(pivot)(move);
 
-      const tetrisCanMove = canMove(centers)(move)(Y)(board)
+      const tetrisCanMoveOnX = canMoveOnAxis(centers)(move)(X)(board);
+      const tetrisCanMoveOnY = canMoveOnAxis(centers)(move)(Y)(board);
+
+      const tetrisCanMove = tetrisCanMoveOnX && tetrisCanMoveOnY;
 
       console.log( tetrisCanMove
       )
@@ -32,9 +35,9 @@ const gameReducer = (state = initialState, action) => {
         ... state,
         angle: 0,
         direction: nextDirection,
-        pivot: nextPivot,
+        pivot: tetrisCanMove ? nextPivot : pivot,
         tetris: tetris,
-        vertices: nextVertices,
+        vertices: tetrisCanMove ? nextVertices: vertices,
         squaresDown: []
       }
     case ROTATE:
@@ -70,6 +73,13 @@ const drawTetris = angle => tetris => pivot => pixel => tetris
     (addCoords(pivot)(point)) // returns 4 arrays of vertices;
     (pixel))
 
-const canMove = points => move => axis => maximum => points.some(
-  point => point[axis] + point[axis] < maximum[axis]
+const canMoveOnAxis = points => move => axis => maximum => points.every(
+  point => point[axis] + move[axis] < maximum[axis] &&
+           point[axis] + move[axis] > 0
+)
+
+const willCollide = points => move => otherPoints => points.some(
+  point => otherPoints.some(
+    p => ! pointsAreEqual (addCoords(point)(move)) (p)
+  )
 )

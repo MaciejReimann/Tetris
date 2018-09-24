@@ -6,6 +6,10 @@ const resize = canvas => width => height => {
   return canvas;
 }
 
+const clear = canvas => {
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+}
+
 
 const drawSquare = context => vertices => {
   context.beginPath();
