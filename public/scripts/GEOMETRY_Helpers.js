@@ -9,9 +9,9 @@ const addCoords = point1 => point2 => merge({})({
   y: point1.y + point2.y
 })
 
-const diffCoords = point1 => point2 => merge({})({
-  x: point1.x - point2.x,
-  y: point1.y - point2.y
+const moveCoordsXY = point => dim => merge({})({
+  x: point.x + dim,
+  y: point.y + dim
 })
 
 const multiplyCoords = point => mult => merge({})({
@@ -19,19 +19,9 @@ const multiplyCoords = point => mult => merge({})({
   y: point.y * mult
 })
 
-const reflectX = point => merge({})({
-  x: point.x,
-  y: point.y * (-1)
-})
-
-const reflectY = point => merge({})({
-  x: point.x * (-1),
-  y: point.y
-})
-
-const reflectXY = point => merge({})({
-  x: point.x * (-1),
-  y: point.y * (-1)
+const flip = point => x => y => merge({})({
+  x: point.x + 2 * (x-point.x),
+  y: point.y + 2 * (y-point.y)
 })
 
 const translateToPolar = vertex => angle => merge({}) ({
@@ -43,3 +33,13 @@ const translateToCartesian = vertex => merge({}) ({
   x: vertex.r * Math.cos( (vertex.angle) * (Math.PI / 180) ),
   y: vertex.r * Math.sin( (vertex.angle) * (Math.PI / 180) )
 })
+
+// Returns vertices' cartesian local coordinates
+const regularPolygon = angle => center => sides => dim => Array(sides).fill()
+  .map((_, i) => addCoords(
+    translateToCartesian(merge({})({
+      r: dim / Math.sqrt(2) ,
+      angle: 360 / sides * i + angle
+    }))
+  )(center)
+)

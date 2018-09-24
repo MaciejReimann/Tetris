@@ -2,20 +2,20 @@
 
 const handle = (() => {
 
-  const start = direction => store.dispatch(action = { type: START })
-
-  const pause = direction => store.dispatch(action = { type: PAUSE })
-
-  const rotate = direction => store.dispatch(action ={
+  const start = direction => store.dispatch({
+    type: START
+  })
+  const pause = direction => store.dispatch({
+    type: PAUSE
+  })
+  const rotate = direction => store.dispatch({
     type: ROTATE,
     direction
   })
-
-  const move = direction => store.dispatch(action = {
+  const move = direction => store.dispatch({
     type: MOVE,
     direction
   })
-
   return { move, rotate, start, pause }
 
 })()
@@ -32,4 +32,4 @@ window.addEventListener('keydown', e => {
   }
 })
 
-store.subscribe(renderCanvas);
+store.subscribe(() => renderCanvas(store.getState()));

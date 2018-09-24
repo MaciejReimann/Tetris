@@ -1,14 +1,8 @@
 
 const { createStore } = Redux;
 
-// ACTIPON TYPES
-const START = 'START';
-const PAUSE = 'PAUSE';
-const MOVE = 'MOVE';
-const ROTATE = 'ROTATE';
-
-
 const gameReducer = (state = initialState, action) => {
+  const { pixel, pivot, centers, vertices, angle, direction } = state.tetris;
   switch (action.type) {
     case START:
     console.log(`Game ${action.type}`)
@@ -24,9 +18,19 @@ const gameReducer = (state = initialState, action) => {
       }
     case MOVE:
     console.log(`Moved ${action.direction}`)
+
+    // const nextVertices = rotateGlobalPoints(angle)
+    //   (centers)(pivot)(pixel)(direction)
+    const nextVertices = drawTetris(angle)(centers)(pivot)(pixel)(direction)
+    console.log(
+    )
       return {
         ... state,
-        direction: action.direction
+        direction: action.direction,
+        tetris: {
+          ...state.tetris,
+          vertices: nextVertices
+        }
       }
     case ROTATE:
     console.log(`Rotated ${action.direction}`)
@@ -42,75 +46,15 @@ const gameReducer = (state = initialState, action) => {
 const store = createStore(gameReducer)
 
 
+// GAME LOGIC
 
+const squareVertices = angle => center => dim => regularPolygon
+  (angle + 45)(center)(4)(dim)
 
-
-
-
-// gameboard setup
-
-// tetris transformations
-// const getCartesianSquareVertices = center => pixel => [].concat(
-//   {
-//     x: center.x - (pixel / 2),
-//     y: center.y - (pixel / 2)
-//   },
-//   {
-//     x: center.x + (pixel / 2),
-//     y: center.y - (pixel / 2)
-//   },
-//   {
-//     x: center.x + (pixel / 2),
-//     y: center.y + (pixel / 2)
-//   },
-//   {
-//     x: center.x - (pixel / 2),
-//     y: center.y + (pixel / 2)
-//   },
-// );
-// const firstOne = getCartesianSquareVertices(state.pivot)(state.pixel)
-//
-// const getPolarVertices = center => pixel => vertices => angle => vertices
-//   .map(vertex => translateToPolar(diffCoords(center)(vertex)) (angle))
-//
-// const getCartesianVertices = center => pixel => vertices => vertices
-//   .map(vertex => addCoords (translateToCartesian(vertex) ) (center) )
-//
-// const moveTetris = tetris => direction => tetris.map(
-//   center => addCoords(center)(direction)
-// )
-//
-//
-//
-// // const translateSquareVerticesToPolar = center => pixel => angle => {
-// //   return getCartesianSquareVertices(center)(pixel)
-// //     .map(vertex => translateToPolar(diffCoords(center)(vertex)) (angle) )
-// //     .map(vertex => translateToCartesian(
-// //       addCoords(center) ( multiplyCoords(vertex)(pixel) )
-// //     ))
-// // }
-//
-//
-// const SHAPE_POLAR = getPolarVertices(state.pivot)(state.pixel)(firstOne)(0)
-// const SHAPE_CARTESIAN = getCartesianVertices(state.pivot)(state.pixel)(SHAPE_POLAR)
-//
-// console.log(
-// addCoords(state.pivot)(state.pivot)
-// )
-//
-//
-//
-//
-// const nextPivot = state => addCoords(state.pivot)(state.move)
-// const nextVertices = state => tetris => tetris.map(vertex => addCoords(state.pivot)(vertex))
-//
-// const polarTetris = tetris => tetris.map( center => translateToPolar(center))
-// const cartesianTetris = tetris => tetris.map( center => translateToCartesian(center))
-//
-// const movedTetris = nextVertices(state)(currentTetris)
-//
-// const polar = polarTetris(currentTetris)
-//
-// const backToCart = cartesianTetris(polar)
-//
-// const tetrisInPolar = tetris => angle => tetris.map(center => translateToPolar(center))
+const drawTetris = angle => centers => pivot => pixel => direction => centers
+  .map(point => multiplyCoords(point)(pixel)) // scale square centers; pivot(0,0)
+  .map(point => translateToPolar(point)(angle)) // rotates them if angle != 0; pivot(0,0)
+  .map(point => translateToCartesian(point)) // returns cartesian coords; pivot(0,0)
+  .map(point => squareVertices(angle)
+    (addCoords(pivot)(point)) // returns 4 arrays of vertices; pivot(0,0)
+    (pixel))

@@ -17,6 +17,8 @@ const drawSquare = context => vertices => {
   return context;
 }
 
+
+
 const convert = vertices => unit => vertices.map(
   vertex => multiplyCoords(vertex)(unit)
 )

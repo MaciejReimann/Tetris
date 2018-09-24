@@ -1,17 +1,18 @@
 
-// const currentGame = state;
-// const MAIN = document.querySelector('main');
-// const LARGE_CANVAS = appendTo(createCanvasWithClass('canvas'))(MAIN);
-// const largeCtx = LARGE_CANVAS.getContext('2d');
-// resize(LARGE_CANVAS)(currentGame.width)(currentGame.height)
-// const unit = currentGame.pixel;
-//
-//
-//
-// drawSquare(largeCtx)( SHAPE_CARTESIAN ).fill()
 
 
-const renderCanvas = () => {
-  const MAIN = document.querySelector('main');
+const MAIN = document.querySelector('main');
+const currentGame = store.getState;
+const LARGE_CANVAS = appendTo(createCanvasWithClass('canvas'))(MAIN);
+resize(LARGE_CANVAS)(currentGame().board.width)(currentGame().board.height)
+
+const renderCanvas = (state) => {
+  const vertices = state.tetris.vertices
+  const largeCtx = LARGE_CANVAS.getContext('2d');
+  const tetris = currentGame().tetris.vertices;
+
+  vertices.map( v => drawSquare(largeCtx)( v ).fill() )
+  console.log(state.tetris)
+  // drawSquare(largeCtx)( vertices ).fill()
   console.log('CANVAS RENDERED')
 }
