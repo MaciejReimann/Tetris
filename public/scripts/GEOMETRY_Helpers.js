@@ -9,6 +9,10 @@ const addCoords = point1 => point2 => merge({})({
   y: point1.y + point2.y
 })
 
+const addCoordsToArrayOfPoints = array => point => array.map(
+  p => addCoords(point)(p)
+)
+
 const moveCoordsXY = point => dim => merge({})({
   x: point.x + dim,
   y: point.y + dim
