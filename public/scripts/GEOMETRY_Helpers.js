@@ -2,7 +2,10 @@
 
 const sqr = n => Math.pow(n, 2);
 
+const mod =  x => y => ((y % x) + x) % x
 const merge = obj1 => obj2 => Object.assign({}, obj1, obj2);
+
+const pointsAreEqual = p1 => p2 => p1.x === p2.x && p1.y === p2.y;
 
 const addCoords = point1 => point2 => merge({})({
   x: point1.x + point2.x,

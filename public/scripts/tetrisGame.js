@@ -2,7 +2,7 @@
 const { createStore } = Redux;
 
 const gameReducer = (state = initialState, action) => {
-  const { board, pixel, angle, direction, pivot, tetris, vertices, squares } = state;
+  const { board, pixel, angle, direction, tetris, vertices, squares } = state;
   switch (action.type) {
     case START:
     console.log(`Game ${action.type}`)
@@ -17,27 +17,48 @@ const gameReducer = (state = initialState, action) => {
           isPaused: !state.isPaused
         }
     case MOVE:
-      const nextDirection = DIRECTIONS[action.direction]
-      const move = multiplyCoords(nextDirection)(pixel);
-      const centers = globalCenters(angle)(tetris)(pivot)(pixel)
-      const vertices = drawTetris(angle)(tetris)(pivot)(pixel);
-      const nextVertices = vertices.map(square => addCoordsToArrayOfPoints(square)(move));
-      const nextPivot = addCoords(pivot)(move);
+      const direction = DIRECTIONS[action.direction];
+      const move = multiplyCoords(direction)(pixel);
+      const startPivot = merge({})({x: board.x / 2, y: 10});
+      startPivot.x = staysHalfwayOnX(tetris)(pixel) ? (startPivot.x + pixel / 2) : startPivot.x;
+      startPivot.y = staysHalfwayOnY(tetris)(pixel) ? (startPivot.y + pixel / 2) : startPivot.y;
 
-      const tetrisCanMoveOnX = canMoveOnAxis(centers)(move)(X)(board);
-      const tetrisCanMoveOnY = canMoveOnAxis(centers)(move)(Y)(board);
+      const centers = p => globalCenters(angle)(tetris)(p)(pixel);
+      const willNotHitVerticalBorder = p => willNotHitBorder(centers(p))(move)(X)(board);
+      const willNotHitHorizontalBorder = p => willNotHitBorder(centers(p))(move)(Y)(board);
+      const tetrisWillNotHitBorders = p => willNotHitVerticalBorder(p) && willNotHitHorizontalBorder(p);
 
-      const tetrisCanMove = tetrisCanMoveOnX && tetrisCanMoveOnY;
+      let nextPivot;
+      // checks if runs for the very first time
+      ! state.pivot ? (nextPivot = startPivot) :
+      // checks if does not hit borders
+          (tetrisWillNotHitBorders(state.pivot)
+        ? (nextPivot = addCoords(state.pivot)(move))
+        : (nextPivot = state.pivot))
 
-      console.log( tetrisCanMove
+
+
+
+
+      // checks if can move
+
+
+      // const tetrisWillCollide = willCollide(centers)(move)(squares)
+      const nextTetris = getRandomArrayItem(allTetris);
+
+
+      const nextVertices = drawTetris(angle)(tetris)(nextPivot)(pixel);
+
+
+
+      console.log( startPivot
       )
       return {
         ... state,
         angle: 0,
-        direction: nextDirection,
-        pivot: tetrisCanMove ? nextPivot : pivot,
-        tetris: tetris,
-        vertices: tetrisCanMove ? nextVertices: vertices,
+        pivot: nextPivot,
+        tetris: willNotHitVerticalBorder ? tetris : nextTetris,
+        vertices: nextVertices,
         squaresDown: []
       }
     case ROTATE:
@@ -73,9 +94,16 @@ const drawTetris = angle => tetris => pivot => pixel => tetris
     (addCoords(pivot)(point)) // returns 4 arrays of vertices;
     (pixel))
 
-const canMoveOnAxis = points => move => axis => maximum => points.every(
+const willNotHitBorder = points => move => axis => maximum => points.every(
   point => point[axis] + move[axis] < maximum[axis] &&
            point[axis] + move[axis] > 0
+)
+
+const staysHalfwayOnX = points => pixel => points.some(
+  point => mod(pixel)(point.x) === 0
+)
+const staysHalfwayOnY = points => pixel => points.some(
+  point => mod(pixel)(point.y) === 0
 )
 
 const willCollide = points => move => otherPoints => points.some(

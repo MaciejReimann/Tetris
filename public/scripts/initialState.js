@@ -18,9 +18,7 @@ const initialState = {
   board: { x: 200, y: 500 },
   pixel: 10,
   angle: 0,
-  direction: DOWN,
-  pivot: { x: 100, y: 20 },
-  tetris: allTetris[0],
+  tetris: allTetris[1],
   vertices: [],
   squares: []
 }
