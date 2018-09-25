@@ -19,45 +19,59 @@ const gameReducer = (state = initialState, action) => {
     case MOVE:
       const direction = DIRECTIONS[action.direction];
       const move = multiplyCoords(direction)(pixel);
-      const startPivot = merge({})({x: board.x / 2, y: 10});
-      startPivot.x = staysHalfwayOnX(tetris)(pixel) ? (startPivot.x + pixel / 2) : startPivot.x;
-      startPivot.y = staysHalfwayOnY(tetris)(pixel) ? (startPivot.y + pixel / 2) : startPivot.y;
+      const firstSquare = squareVertices(angle)(tetris[0])(pixel)
+      const middle = merge({})({ x: board.x / 2, y: 0})
+      const startPivot = tetris => addCoords(findStartPivot(tetris)(pixel))(middle)
+      // console.log(startPivot)
+      // console.log(missesGrid(X)(firstSquare), missesGrid(Y)(firstSquare) )
+      // if (missesGrid(X)(firstSquare)) {console.log(startPivot.x)}
+      // if (missesGrid(Y)(firstSquare)) {console.log(startPivot.y)}
+      //
+      // if (missesGrid(X)(firstSquare)) {startPivot.x = startPivot.x + pixel / 2}
+      // if (missesGrid(Y)(firstSquare)) {startPivot.y = startPivot.y + pixel / 2}
+      // console.log(startPivot)
+      // console.log(fitsToGridX(firstSquare))
+
+      // startPivot.x = ! missesGrid(X)(firstSquare) ? (startPivot.x + pixel / 2) : startPivot.x;
+      // startPivot.y = missesGrid(Y)(firstSquare) ? (startPivot.y + pixel / 2) : startPivot.y;
 
       const centers = p => globalCenters(angle)(tetris)(p)(pixel);
-      const willNotHitVerticalBorder = p => willNotHitBorder(centers(p))(move)(X)(board);
-      const willNotHitHorizontalBorder = p => willNotHitBorder(centers(p))(move)(Y)(board);
-      const tetrisWillNotHitBorders = p => willNotHitVerticalBorder(p) && willNotHitHorizontalBorder(p);
+      const tetrisCanMoveSideways = p => willNotHitBorder(centers(p))(move)(X)(board.x)(0)
+        && !collides();
+      const tetrisCanMoveDown = p => willNotHitBorder(centers(p))(move)(Y)(board.y)(-pixel)
+        && !collides();
+      const tetrisCanMove = p => tetrisCanMoveSideways(p) && tetrisCanMoveDown(p);
 
       let nextPivot;
-      // checks if runs for the very first time
-      ! state.pivot ? (nextPivot = startPivot) :
-      // checks if does not hit borders
-          (tetrisWillNotHitBorders(state.pivot)
-        ? (nextPivot = addCoords(state.pivot)(move))
-        : (nextPivot = state.pivot))
+      let nextTetris = tetris;
+      // if game is not over move pivot
+      !tetrisCanMoveDown(startPivot(nextTetris))
+       ? gameOver()
+       : !state.pivot
+         ? (nextPivot = addCoords(startPivot(nextTetris))(move))
+         : (nextPivot = addCoords(state.pivot)(move));
+
+      !state.pivot
+        ? (nextTetris = tetris)
+        : !tetrisCanMoveSideways(state.pivot)
+          ? (nextPivot = state.pivot)
+          : tetrisCanMoveDown(state.pivot)
+            ? (nextPivot = nextPivot)
+            : (
+                (nextTetris = getRandomArrayItem(allTetris)) &&
+                (nextPivot = startPivot(nextTetris))
+              )
 
 
+      const nextVertices = drawTetris(angle)(nextTetris)(nextPivot)(pixel);
 
-
-
-      // checks if can move
-
-
-      // const tetrisWillCollide = willCollide(centers)(move)(squares)
-      const nextTetris = getRandomArrayItem(allTetris);
-
-
-      const nextVertices = drawTetris(angle)(tetris)(nextPivot)(pixel);
-
-
-
-      console.log( startPivot
+      console.log(nextPivot
       )
       return {
         ... state,
         angle: 0,
         pivot: nextPivot,
-        tetris: willNotHitVerticalBorder ? tetris : nextTetris,
+        tetris: nextTetris,
         vertices: nextVertices,
         squaresDown: []
       }
@@ -94,17 +108,30 @@ const drawTetris = angle => tetris => pivot => pixel => tetris
     (addCoords(pivot)(point)) // returns 4 arrays of vertices;
     (pixel))
 
-const willNotHitBorder = points => move => axis => maximum => points.every(
-  point => point[axis] + move[axis] < maximum[axis] &&
-           point[axis] + move[axis] > 0
+const willNotHitBorder = points => move => axis => maximum => minimum => points.every(
+  point => point[axis] + move[axis] < maximum &&
+           point[axis] + move[axis] > minimum
 )
 
-const staysHalfwayOnX = points => pixel => points.some(
-  point => mod(pixel)(point.x) === 0
+const findStartPivot = tetris => pixel => merge({})({
+  x: (mod(1)(tetris[0].x) === 0) ? pixel / 2 : 0,
+  y: (mod(1)(tetris[0].y) === 0) ? pixel / 2 : 0
+})
+
+console.log(
+  findStartPivot(T_tetris)(10),
+  findStartPivot(I_tetris)(10),
+  findStartPivot(C_tetris)(10)
 )
-const staysHalfwayOnY = points => pixel => points.some(
-  point => mod(pixel)(point.y) === 0
+
+
+const missesGrid = axis => points => points.every(
+  point => (mod(1)(point[axis]) === 0)
 )
+
+const collides = () => false;
+
+const gameOver = () => console.log('game over')
 
 const willCollide = points => move => otherPoints => points.some(
   point => otherPoints.some(

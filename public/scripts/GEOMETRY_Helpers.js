@@ -2,14 +2,17 @@
 
 const sqr = n => Math.pow(n, 2);
 
-const mod =  x => y => ((y % x) + x) % x
 const merge = obj1 => obj2 => Object.assign({}, obj1, obj2);
+const mod =  x => y => ((y % x) + x) % x // http://bit.ly/2oF4mQ7
 
 const pointsAreEqual = p1 => p2 => p1.x === p2.x && p1.y === p2.y;
-
 const addCoords = point1 => point2 => merge({})({
   x: point1.x + point2.x,
   y: point1.y + point2.y
+})
+const diffCoords = point1 => point2 => merge({})({
+  x: point1.x - point2.x,
+  y: point1.y - point2.y
 })
 
 const addCoordsToArrayOfPoints = array => point => array.map(
@@ -37,8 +40,8 @@ const translateToPolar = vertex => angle => merge({}) ({
 })
 
 const translateToCartesian = vertex => merge({}) ({
-  x: vertex.r * Math.cos( (vertex.angle) * (Math.PI / 180) ),
-  y: vertex.r * Math.sin( (vertex.angle) * (Math.PI / 180) )
+  x: Math.round(vertex.r * Math.cos( (vertex.angle) * (Math.PI / 180) )),
+  y: Math.round(vertex.r * Math.sin( (vertex.angle) * (Math.PI / 180) ))
 })
 
 // Returns vertices' cartesian local coordinates

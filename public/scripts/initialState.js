@@ -18,7 +18,7 @@ const initialState = {
   board: { x: 200, y: 500 },
   pixel: 10,
   angle: 0,
-  tetris: allTetris[1],
+  tetris: allTetris[0],
   vertices: [],
   squares: []
 }
