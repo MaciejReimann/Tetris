@@ -2,10 +2,13 @@
 
 const gameOver = () => console.log('game over')
 
-const findStartPivot = tetris => pixel => merge({})({
-  x: (mod(1)(tetris[0].x) === 0) ? pixel / 2 : 0,
-  y: (mod(1)(tetris[0].y) === 0) ? pixel / 2 : 0
-})
+// const findStartPivot = tetris => pixel => merge({})({
+//   x: (mod(1)(tetris[0].x) === 0) ? pixel / 2 : 0,
+//   y: (mod(1)(tetris[0].y) === 0) ? pixel / 2 : 0
+// })
+//
+// const correctPivot = pivot => tetris => pixel => addCoords(
+//   pivot)( findStartPivot(tetris)(pixel) )
 
 const isWithinRange = points => axis => minimum => maximum =>
   points.every(
@@ -33,6 +36,7 @@ const getGlobalSquareCenters = move => angle => tetris => pivot => pixel =>
 
 const squareVertices = angle => center => dim => regularPolygon
       (angle + 45)(center)(4)(dim)
+
 
 const drawTetris = angle => tetris => pivot => pixel => tetris
   .map(point => multiplyCoords(point)(pixel)) // scale square centers; pivot(0,0)

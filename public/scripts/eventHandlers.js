@@ -8,15 +8,15 @@ const handle = (() => {
   const pause = direction => store.dispatch({
     type: PAUSE
   })
-  const rotate = direction => store.dispatch({
-    type: ROTATE,
-    direction
-  })
+  // const rotate = direction => store.dispatch({
+  //   type: ROTATE,
+  //   direction
+  // })
   const move = direction => store.dispatch({
     type: MOVE,
     direction
   })
-  return { move, rotate, start, pause }
+  return { move, start, pause }
 
 })()
 
@@ -25,8 +25,8 @@ window.addEventListener('keydown', e => {
     case 'ArrowLeft':   handle.move('LEFT');  break
     case 'ArrowDown':   handle.move('DOWN'); break
     case 'ArrowRight':  handle.move('RIGHT');  break
-    case 'a': case 'A': handle.rotate('RIGHT');  break
-    case 'z': case 'Z': handle.rotate('LEFT');  break
+    case 'a': case 'A': handle.move('ROTATE_RIGHT');  break
+    case 'z': case 'Z': handle.move('ROTATE_LEFT');  break
     case 'Enter':       handle.start();  break
     case ' ':           handle.pause();  break // spacebar
   }

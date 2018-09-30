@@ -6,9 +6,11 @@ const merge = obj1 => obj2 => Object.assign({}, obj1, obj2);
 const mod =  x => y => ((y % x) + x) % x // http://bit.ly/2oF4mQ7
 
 const pointsAreEqual = p1 => p2 => p1.x === p2.x && p1.y === p2.y;
-const addCoords = point1 => point2 => merge({})({
+
+const addCoords = point1 => point2 => merge()({
   x: point1.x + point2.x,
-  y: point1.y + point2.y
+  y: point1.y + point2.y,
+  angle: point1.angle + point2.angle
 })
 const diffCoords = point1 => point2 => merge({})({
   x: point1.x - point2.x,
