@@ -4,6 +4,7 @@ import {
   addPoints,
   multiplyPoint,
   arePointsEqual,
+  arePointsWithinRange,
   translateToPolar,
   translateToCartesian
 } from "../../helpers/pointsHelpers.js";
@@ -70,11 +71,29 @@ test("When multiplied by -1 returns symmetrical point to global zero", () => {
 });
 
 // arePointsEqual
-it("Checks if two points are equal", () => {
+test("Checks if two points are equal", () => {
   expect(arePointsEqual({ x: -1, y: -1 })({ x: 1, y: 1 })).toBeFalsy();
   expect(arePointsEqual({ x: 0, y: 0 })({})).toBeFalsy();
   expect(arePointsEqual({ x: 1, y: 1 })({ x: 1, y: 1 })).toBeTruthy();
   expect(arePointsEqual({ x: 1, y: 1 })({ x: 1, y: 1, z: 0 })).toBeTruthy();
+});
+
+// arePointsWithinRange
+test("Returns falsy", () => {
+  let arrayOfPoints = [{ x: -1, y: -1 }, { x: 1, y: 1 }, { x: 0.5, y: -1 }];
+  expect(arePointsWithinRange(arrayOfPoints)("x")(0)(1)).toBeFalsy();
+});
+test("Returns falsy", () => {
+  let arrayOfPoints = [{ x: -1, y: -1 }, { x: 1, y: 1 }, { x: 0.5, y: -1 }];
+  expect(arePointsWithinRange(arrayOfPoints)("y")(0)(1)).toBeFalsy();
+});
+test("Returns truthy", () => {
+  let arrayOfPoints = [{ x: -1, y: -1 }, { x: 1, y: 1 }, { x: 0.5, y: -1 }];
+  expect(arePointsWithinRange(arrayOfPoints)("x")(-5)(5)).toBeTruthy();
+});
+test("Returns falsy", () => {
+  let arrayOfPoints = [{ x: -1, y: -1 }, { x: 1, y: 1 }, { x: 0.5, y: -1 }];
+  expect(arePointsWithinRange(arrayOfPoints)("y")(-5)(0)).toBeFalsy();
 });
 
 // translateToPolar

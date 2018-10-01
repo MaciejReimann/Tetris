@@ -21,6 +21,15 @@ export const multiplyPoint = point => mult =>
 
 export const arePointsEqual = p1 => p2 => p1.x === p2.x && p1.y === p2.y;
 
+export const arePointsWithinRange = arrayOfPoints => axis => minimum => maximum =>
+  arePoints(arrayOfPoints) &&
+  (axis === "x" || axis === "y") &&
+  !isNaN(minimum) &&
+  !isNaN(maximum) &&
+  arrayOfPoints.every(
+    point => point[axis] >= minimum && point[axis] <= maximum
+  );
+
 export const translateToPolar = vertex => angle =>
   merge({})({
     r: Math.sqrt(Math.pow(vertex.x, 2) + Math.pow(vertex.y, 2)),
