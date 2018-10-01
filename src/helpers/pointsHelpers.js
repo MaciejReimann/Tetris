@@ -1,5 +1,3 @@
-export const sqr = n => Math.pow(n, 2);
-
 export const merge = obj1 => obj2 => Object.assign({}, obj1, obj2);
 
 export const arePoints = array =>
@@ -17,7 +15,7 @@ export const arePointsEqual = p1 => p2 => p1.x === p2.x && p1.y === p2.y;
 
 export const translateToPolar = vertex => angle =>
   merge({})({
-    r: Math.sqrt(sqr(vertex.x) + sqr(vertex.y)),
+    r: Math.sqrt(Math.pow(vertex.x, 2) + Math.pow(vertex.y, 2)),
     angle: Math.atan2(vertex.y, vertex.x) * (180 / Math.PI) + angle
   });
 

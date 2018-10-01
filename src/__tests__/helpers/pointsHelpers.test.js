@@ -1,5 +1,4 @@
 import {
-  sqr,
   merge,
   arePoints,
   addPoints,
@@ -7,13 +6,6 @@ import {
   translateToPolar,
   translateToCartesian
 } from "../../helpers/pointsHelpers.js";
-
-// sqr
-test("Gives a number to the power of two", () => {
-  expect(sqr(2)).toBe(4);
-  expect(sqr(1)).toBe(1);
-  expect(sqr(0)).toBe(0);
-});
 
 // merge
 test("When objects have different properties, adds the properties", () => {
