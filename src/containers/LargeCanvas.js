@@ -6,9 +6,7 @@ import { moveTetris } from "../actions/index";
 import Canvas from "../components/Canvas";
 
 class LargeCanvas extends Component {
-  componentDidMount() {
-    console.log(this.props.game);
-  }
+  componentDidMount() {}
   render() {
     return (
       <div className="large-canvas">

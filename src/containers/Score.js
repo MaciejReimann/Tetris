@@ -1,26 +1,16 @@
-import React, { Component } from "react";
+import React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 
 import { incrementScore } from "../actions/index";
 
-class Score extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { props };
-  }
-
-  render() {
-    return (
-      <div
-        className="score-counter"
-        onClick={() => this.props.incrementScore()}
-      >
-        {this.state.score}
-      </div>
-    );
-  }
-}
+const Score = props => {
+  return (
+    <div className="score-counter" onClick={() => props.incrementScore()}>
+      {props.score}
+    </div>
+  );
+};
 
 function mapStateToProps(state) {
   return {
