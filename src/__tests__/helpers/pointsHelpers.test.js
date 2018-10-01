@@ -2,6 +2,7 @@ import {
   merge,
   arePoints,
   addPoints,
+  multiplyPoint,
   arePointsEqual,
   translateToPolar,
   translateToCartesian
@@ -53,6 +54,19 @@ test("Ignores non coord-related properties", () => {
     x: 0,
     y: 0
   });
+});
+
+// multiplyPoint
+test("When multiplied by 0 returns (0,0)", () => {
+  expect(multiplyPoint({ x: 1, y: 1 })(0)).toEqual({ x: 0, y: 0 });
+});
+
+test("When multiplied by 1 returns itself", () => {
+  expect(multiplyPoint({ x: 1, y: 1 })(1)).toEqual({ x: 1, y: 1 });
+});
+
+test("When multiplied by -1 returns symmetrical point to global zero", () => {
+  expect(multiplyPoint({ x: 0.5, y: -1 })(-1)).toEqual({ x: -0.5, y: 1 });
 });
 
 // arePointsEqual

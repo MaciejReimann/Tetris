@@ -11,6 +11,14 @@ export const addPoints = p1 => p2 =>
       })
     : null;
 
+export const multiplyPoint = point => mult =>
+  arePoints([point]) && !isNaN(mult)
+    ? merge({})({
+        x: point.x * mult,
+        y: point.y * mult
+      })
+    : null;
+
 export const arePointsEqual = p1 => p2 => p1.x === p2.x && p1.y === p2.y;
 
 export const translateToPolar = vertex => angle =>
