@@ -5,9 +5,11 @@ import {
   multiplyPoint,
   arePointsEqual,
   arePointsWithinRange,
+  roundValue,
   translateToPolar,
-  translateToCartesian
-} from "../../helpers/pointsHelpers.js";
+  translateToCartesian,
+  rotateOnGlobalZero
+} from "../../helpers/pointsManipulation.js";
 
 // merge
 test("When objects have different properties, adds the properties", () => {
@@ -96,6 +98,19 @@ test("Returns falsy", () => {
   expect(arePointsWithinRange(arrayOfPoints)("y")(-5)(0)).toBeFalsy();
 });
 
+// roundValue
+test("Returns truthy", () => {
+  let n = -1.092837092309489324;
+  expect(roundValue(n)).not.toBe(n);
+});
+
+test("Returns truthy", () => {
+  let n = -1.092837092309489324;
+  let m = -1.93824983409209375832498237;
+  expect(roundValue(n)).toBe(-1.093);
+  expect(roundValue(m)).toBe(-1.938);
+});
+
 // translateToPolar
 test("Returns a point on (1.4142135623730951, 45)", () => {
   expect(translateToPolar({ x: 1, y: 1 })(0)).toEqual({
@@ -139,4 +154,35 @@ test("Returns a point on (2,-2)", () => {
 
 test("Returns a point on (0,-2)", () => {
   expect(translateToCartesian({ r: 2, angle: -90 })).toEqual({ x: 0, y: -2 });
+});
+
+// rotateOnGlobalZero
+test("Returns the same point when rotated by zero angle", () => {
+  let point = { x: 1, y: 1 };
+  expect(rotateOnGlobalZero(point)(0)).toEqual(point);
+});
+
+test("Returns the same point when rotated by 360 angle", () => {
+  let point = { x: 1, y: 1 };
+  expect(rotateOnGlobalZero(point)(360)).toEqual(point);
+});
+
+test("Returns a flipped by (0,0) point when rotated by 180 angle", () => {
+  let point = { x: 1, y: 1 };
+  expect(rotateOnGlobalZero(point)(180)).toEqual({ x: -1, y: -1 });
+});
+
+test("Returns a fliped by y axis point when rotated by 90 angle", () => {
+  let point = { x: 1, y: 1 };
+  expect(rotateOnGlobalZero(point)(90)).toEqual({ x: -1, y: 1 });
+});
+
+test("Returns a fliped by x axis point when rotated by -90 angle", () => {
+  let point = { x: 1, y: 1 };
+  expect(rotateOnGlobalZero(point)(-90)).toEqual({ x: 1, y: -1 });
+});
+
+test("Points are not equal wwhen rotated by 30 angle", () => {
+  let point = { x: 1, y: 1 };
+  expect(rotateOnGlobalZero(point)(30)).not.toEqual(point);
 });
