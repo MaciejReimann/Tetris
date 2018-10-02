@@ -1,4 +1,4 @@
-import { arePoints } from "../../helpers/pointsHelpers";
+import { arePoints } from "../../helpers/pointsManipulation";
 import {
   T_tetris,
   I_tetris,
@@ -14,6 +14,14 @@ test("Returns truthy if length 4", () => {
 
 test("Returns truthy if all are points", () => {
   expect(allTetris.every(arePoints)).toBeTruthy();
+});
+
+test("Returns truthy if all points are missing the grid by .5", () => {
+  expect(
+    allTetris.every(tetris =>
+      tetris.every(point => Math.abs(point.x % 1) === 0.5)
+    )
+  ).toBeTruthy();
 });
 
 // getRandomTetris
