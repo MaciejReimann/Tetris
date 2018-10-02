@@ -1,4 +1,5 @@
 import {
+  addPoints,
   multiplyPoint,
   translateToPolar,
   translateToCartesian,
@@ -12,3 +13,7 @@ export const scalePoints = arrayOfPoints => scale =>
 // rotates as if pivot were on global zero
 export const rotatePoints = arrayOfPoints => angle =>
   arrayOfPoints.map(p => rotateOnGlobalZero(p)(angle));
+
+// move from global zero to where the pivot is
+export const movePoints = arrayOfPoints => move =>
+  arrayOfPoints.map(p => addPoints(p)(move));

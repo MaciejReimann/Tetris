@@ -1,14 +1,27 @@
-import { scalePoints, rotatePoints } from "../../helpers/pointArrays";
+import {
+  scalePoints,
+  rotatePoints,
+  movePoints
+} from "../../helpers/pointArrays";
 import { getRandomTetris } from "../../logic/tetrisDefinition";
 
 test("Returns truthy", () => {});
 
 // scaleSquareCenters
-test("Returns truthy when scaled up and down again", () => {
+test("Returns array of the same points when scaled up and down again", () => {
   let tetris = getRandomTetris();
-  let scaledUp = scalePoints(getRandomTetris())(10);
+  let scaledUp = scalePoints(tetris)(10);
+  let scaledDown = scalePoints(scaledUp)(0.1);
   expect(
-    scalePoints(tetris)(0.1).toString() === tetris.toString()
+    scaledDown.every((p, i) => p.x === tetris[i].x && p.y === tetris[i].y)
+  ).toBeTruthy();
+});
+
+test("Returns array of the same points when scaled with 1", () => {
+  let tetris = getRandomTetris();
+  let scaledWithOne = scalePoints(tetris)(1);
+  expect(
+    scaledWithOne.every((p, i) => p.x === tetris[i].x && p.y === tetris[i].y)
   ).toBeTruthy();
 });
 
@@ -18,21 +31,51 @@ test("Returns all zeros when scaled with 0 ", () => {
 });
 
 // rotateOnGlobalZero
-test("Returns truthy when rotated by zero angle", () => {
+test("Returns array of the same points when rotated by zero angle", () => {
   let tetris = getRandomTetris();
   let rotated = rotatePoints(tetris)(0);
-  expect(rotated.toString() === tetris.toString()).toBeTruthy();
+  expect(
+    rotated.every((p, i) => p.x === tetris[i].x && p.y === tetris[i].y)
+  ).toBeTruthy();
 });
 
-test("Returns truthy when rotated by 360 angle", () => {
+test("Returns array of the same points when rotated by 360 angle", () => {
   let tetris = getRandomTetris();
   let rotated = rotatePoints(tetris)(360);
-  expect(rotated.toString() === tetris.toString()).toBeTruthy();
+  expect(
+    rotated.every((p, i) => p.x === tetris[i].x && p.y === tetris[i].y)
+  ).toBeTruthy();
 });
 
-// test("Returns falsy when rotated by an angle", () => {
-//   let tetris = getRandomTetris();
-//   let rotated = rotatePoints(tetris)("78");
-//   console.log(rotated.toString() === tetris.toString());
-//   expect(rotated.toString() === tetris.toString()).toBeFalsy();
-// });
+test("Returns array of different points when rotated by 30 angle", () => {
+  let tetris = getRandomTetris();
+  let rotated = rotatePoints(tetris)(30);
+  expect(
+    rotated.every((p, i) => p.x !== tetris[i].x && p.y !== tetris[i].y)
+  ).toBeTruthy();
+});
+
+// movePoints
+test("Returns array of the same points when moved by 0", () => {
+  let tetris = getRandomTetris();
+  let moved = movePoints(tetris)({ x: 0, y: 0 });
+  expect(
+    moved.every((p, i) => p.x === tetris[i].x && p.y === tetris[i].y)
+  ).toBeTruthy();
+});
+
+test("Returns array of points + 1 when moved by 1", () => {
+  let tetris = getRandomTetris();
+  let moved = movePoints(tetris)({ x: 1, y: 1 });
+  expect(
+    moved.every((p, i) => p.x === tetris[i].x + 1 && p.y === tetris[i].y + 1)
+  ).toBeTruthy();
+});
+
+test("Returns array of points -2 when moved by -2", () => {
+  let tetris = getRandomTetris();
+  let moved = movePoints(tetris)({ x: -2, y: -2 });
+  expect(
+    moved.every((p, i) => p.x === tetris[i].x - 2 && p.y === tetris[i].y - 2)
+  ).toBeTruthy();
+});
