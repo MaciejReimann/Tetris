@@ -36,6 +36,7 @@ class LargeCanvas extends Component {
     });
   }
   render() {
+    console.log(this.props.game);
     return (
       <div className="large-canvas">
         <Canvas w={300} h={500} vertices={this.props.game} />

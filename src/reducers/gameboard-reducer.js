@@ -1,9 +1,16 @@
 import { MOVE } from "../actions/types";
+import { merge } from "../helpers/pointsManipulation";
 
-export default function(state = {}, action) {
+import { initialState } from "../logic/initialState";
+
+export default function(state = initialState, action) {
   switch (action.type) {
     case MOVE:
-      return action.payload;
+      let nextState = {
+        test: "of data flow"
+      };
+
+      return merge(state)(nextState);
     default:
       return state;
   }

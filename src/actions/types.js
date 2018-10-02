@@ -2,5 +2,3 @@
 export const START = "START";
 export const PAUSE = "PAUSE";
 export const MOVE = "MOVE";
-
-export const INCREMENT = "INCREMENT";

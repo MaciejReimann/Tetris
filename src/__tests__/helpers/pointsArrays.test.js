@@ -2,10 +2,8 @@ import {
   scalePoints,
   rotatePoints,
   movePoints
-} from "../../helpers/pointArrays";
+} from "../../helpers/pointsArrays";
 import { getRandomTetris } from "../../logic/tetrisDefinition";
-
-test("Returns truthy", () => {});
 
 // scaleSquareCenters
 test("Returns array of the same points when scaled up and down again", () => {
