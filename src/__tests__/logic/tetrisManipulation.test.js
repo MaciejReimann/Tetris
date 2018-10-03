@@ -1,3 +1,6 @@
-import {} from "../../logic/tetrisManipulation";
+import {
+  getSquareCenters,
+  getTetrisVertices
+} from "../../logic/tetrisManipulation";
 
 // test("Returns truthy", () => {});

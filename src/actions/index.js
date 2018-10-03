@@ -2,7 +2,8 @@ import { MOVE, START, PAUSE } from "./types";
 
 export const moveTetris = direction => {
   return {
-    type: MOVE
+    type: MOVE,
+    payload: direction
   };
 };
 

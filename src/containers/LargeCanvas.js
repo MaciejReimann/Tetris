@@ -32,14 +32,19 @@ class LargeCanvas extends Component {
         case " ":
           this.props.pauseGame();
           break; // spacebar
+        default:
+          console.log("Default case");
       }
     });
   }
   render() {
-    console.log(this.props.game);
     return (
       <div className="large-canvas">
-        <Canvas w={300} h={500} vertices={this.props.game} />
+        <Canvas
+          w={this.props.game.board.x}
+          h={this.props.game.board.y}
+          vertices={this.props.game.vertices}
+        />
       </div>
     );
   }
