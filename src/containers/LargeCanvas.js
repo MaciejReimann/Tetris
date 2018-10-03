@@ -2,7 +2,12 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 
-import { moveTetris, startGame, pauseGame } from "../actions/index";
+import {
+  moveTetris,
+  rotateTetris,
+  startGame,
+  pauseGame
+} from "../actions/index";
 import Canvas from "../components/Canvas";
 
 class LargeCanvas extends Component {
@@ -66,7 +71,11 @@ function mapDispatchToProps(dispatch) {
   // , the result,
   // i.e. the action, flows through all reducers
   return bindActionCreators(
-    { moveTetris: moveTetris, startGame: startGame, pauseGame: pauseGame },
+    {
+      moveTetris: moveTetris,
+      startGame: startGame,
+      pauseGame: pauseGame
+    },
     dispatch
   );
 }
