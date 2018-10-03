@@ -7,10 +7,7 @@ import {
 } from "../helpers/pointsManipulation";
 import { X, Y, DIRECTIONS } from "../logic/directionConstants";
 import { initialState } from "../logic/initialState";
-import {
-  getSquareCenters,
-  getTetrisVertices
-} from "../logic/tetrisManipulation";
+import { getSquareCenters, getTetrisVertices } from "../logic/tetrisCreation";
 
 export default function(state = initialState, action) {
   const { board, pixel, angle, tetris } = state;
