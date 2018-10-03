@@ -5,6 +5,9 @@ class Canvas extends Component {
   componentWillReceiveProps(nextProps) {
     this.updateCanvas(nextProps);
   }
+  shouldComponentUpdate(nextProps, nextState) {
+    return false;
+  }
   updateCanvas(gameProps) {
     clear(this.canvas);
     gameProps.vertices.map(v => drawSquare(this.ctx)(v).fill());

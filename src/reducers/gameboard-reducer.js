@@ -11,23 +11,31 @@ import { getSquareCenters, getTetrisVertices } from "../logic/tetrisCreation";
 
 export default function(state = initialState, action) {
   const { counter, board, pixel, angle, tetris } = state;
-  let isGameOver: false;
-  let collides = () => true;
+  const startPoint = { x: board.x / 2, y: -10 };
+  let collides = () => false;
+
+  // get where square centers are in relation to pivot
+  const nextCenters = pivot => getSquareCenters(tetris)(pivot)(angle)(pixel);
+  // define conditions in which pivot moves
+  const canMoveOnX = pivot =>
+    arePointsWithinRange(nextCenters(pivot))(X)(0)(board.x) && !collides();
+  const canMoveOnY = pivot =>
+    arePointsWithinRange(nextCenters(pivot))(Y)(-10)(board.y) && !collides();
+
+  const isGameOver = canMoveOnY(startPoint) ? false : true;
 
   switch (action.type) {
     case MOVE:
       const scaledMove = multiplyPoint(DIRECTIONS[action.payload])(pixel);
-      const startPoint = { x: board.x / 2, y: 10 };
+      const movedPivot =
+        state.pivot && !isGameOver
+          ? addPoints(state.pivot)(scaledMove)
+          : addPoints(startPoint)(scaledMove);
 
-      // get where square centers are in relation to pivot
-      const nextCenters = pivot =>
-        getSquareCenters(tetris)(pivot)(angle)(pixel);
-      // define conditions in which pivot moves
-      const canMoveOnY = pivot =>
-        arePointsWithinRange(nextCenters(pivot))(Y)(0)(board.y) && !collides();
-
-      const nextPivot = state.pivot
-        ? addPoints(state.pivot)(scaledMove)
+      const nextPivot = canMoveOnY(movedPivot)
+        ? canMoveOnX(movedPivot)
+          ? movedPivot
+          : state.pivot
         : startPoint;
 
       const nextVertices = getTetrisVertices(tetris)(nextPivot)(angle)(pixel);
