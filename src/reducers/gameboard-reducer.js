@@ -10,7 +10,7 @@ import { initialState } from "../logic/initialState";
 import { getSquareCenters, getTetrisVertices } from "../logic/tetrisCreation";
 
 export default function(state = initialState, action) {
-  const { board, pixel, angle, tetris } = state;
+  const { counter, board, pixel, angle, tetris } = state;
   let isGameOver: false;
   let collides = () => true;
 
@@ -31,16 +31,17 @@ export default function(state = initialState, action) {
         : startPoint;
 
       const nextVertices = getTetrisVertices(tetris)(nextPivot)(angle)(pixel);
-
+      const nextCounter = counter + 1;
       // console.log(nextCenters);
 
       let nextState = {
         pivot: nextPivot,
         vertices: nextVertices,
+        counter: nextCounter,
 
         isOver: isGameOver
       };
-
+      // console.log(nextState);
       return merge(state)(nextState);
     default:
       return state;

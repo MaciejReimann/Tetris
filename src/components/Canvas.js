@@ -1,23 +1,28 @@
 import React, { Component } from "react";
-import { findDOMNode } from "react-dom";
 import { clear, drawSquare } from "../helpers/canvasContent";
 
 class Canvas extends Component {
-  componentWillReceiveProps() {
-    const canvas = findDOMNode(this.refs["canvas"]);
-    const ctx = canvas.getContext("2d");
-    clear(canvas);
-    this.props.vertices.map(v => drawSquare(ctx)(v).fill());
-    console.log(this.props.vertices);
-    console.log("new props");
+  componentWillReceiveProps(nextProps) {
+    this.updateCanvas(nextProps);
+  }
+  updateCanvas(gameProps) {
+    clear(this.canvas);
+    gameProps.vertices.map(v => drawSquare(this.ctx)(v).fill());
+  }
+
+  setCanvasContext(elem) {
+    if (elem) {
+      this.canvas = elem;
+      this.ctx = elem.getContext("2d");
+    }
   }
 
   render() {
-    console.log("rendering");
+    console.log("rendered");
     return (
       <div className="canvas-container">
         <canvas
-          ref="canvas"
+          ref={this.setCanvasContext.bind(this)}
           className="canvas"
           width={this.props.w}
           height={this.props.h}

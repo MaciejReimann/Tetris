@@ -43,3 +43,5 @@ test("Points scalsed by 10 when angle 0, and scale 10", () => {
     )
   ).toBeTruthy();
 });
+
+// getSquareCenters

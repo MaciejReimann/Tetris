@@ -1,8 +1,8 @@
 import {
   addPoints,
   multiplyPoint,
-  translateToPolar,
-  translateToCartesian,
+  // translateToPolar,
+  // translateToCartesian,
   rotateOnGlobalZero
 } from "../helpers/pointsManipulation";
 
