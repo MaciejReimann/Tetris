@@ -49,6 +49,7 @@ class LargeCanvas extends Component {
           w={this.props.game.board.x}
           h={this.props.game.board.y}
           vertices={this.props.game.vertices}
+          squareVertices={this.props.game.squareVertices}
           counter={this.props.game.counter}
         />
       </div>

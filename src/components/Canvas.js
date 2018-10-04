@@ -11,6 +11,8 @@ class Canvas extends Component {
   updateCanvas(gameProps) {
     clear(this.canvas);
     gameProps.vertices.map(v => drawSquare(this.ctx)(v).fill());
+    console.log(gameProps.squares);
+    gameProps.squareVertices.map(v => drawSquare(this.ctx)(v).fill());
   }
 
   setCanvasContext(elem) {

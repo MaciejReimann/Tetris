@@ -7,6 +7,7 @@ export const initialState = {
   angle: 0,
   tetris: getRandomTetris(),
   vertices: [],
-  squares: [],
+  squareCenters: [],
+  squareVertices: [],
   score: 0
 };

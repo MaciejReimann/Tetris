@@ -1,6 +1,7 @@
 import {
   getSquareCenters,
-  getTetrisVertices
+  getTetrisVertices,
+  isColliding
 } from "../../logic/tetrisCreation";
 import { getRandomTetris } from "../../logic/tetrisDefinition";
 
@@ -33,7 +34,7 @@ test("Points moved by 2 when angle 0, pivot (2,2) and scale 1", () => {
   ).toBeTruthy();
 });
 
-test("Points scalsed by 10 when angle 0, and scale 10", () => {
+test("Points scaled by 10 when angle 0, and scale 10", () => {
   const tetris = getRandomTetris();
   const point = { x: 0, y: 0 };
   const scale = 10;
@@ -44,4 +45,22 @@ test("Points scalsed by 10 when angle 0, and scale 10", () => {
   ).toBeTruthy();
 });
 
-// getSquareCenters
+// getTetrisVertices
+
+test("Truthy when the same tetris are checked for collision", () => {
+  const tetris_1 = getRandomTetris();
+  const tetris_2 = getRandomTetris();
+  const pivot = { x: 0, y: 0 };
+  const angle = 0;
+  const scale = 1;
+  expect(isColliding(tetris_1)(tetris_1)(pivot)(angle)(scale)).toBeTruthy();
+});
+
+test("Falsy when teris pivot moved by 10", () => {
+  const tetris_1 = getRandomTetris();
+  const tetris_2 = getRandomTetris();
+  const pivot = { x: 10, y: 10 };
+  const angle = 0;
+  const scale = 1;
+  expect(isColliding(tetris_1)(tetris_1)(pivot)(angle)(scale)).toBeFalsy();
+});
