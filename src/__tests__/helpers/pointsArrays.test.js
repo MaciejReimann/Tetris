@@ -1,7 +1,8 @@
 import {
   scalePoints,
   rotatePoints,
-  movePoints
+  movePoints,
+  getPointsInLine
 } from "../../helpers/pointsArrays";
 import { getRandomTetris } from "../../logic/tetrisDefinition";
 
@@ -76,4 +77,47 @@ test("Returns array of points -2 when moved by -2", () => {
   expect(
     moved.every((p, i) => p.x === tetris[i].x - 2 && p.y === tetris[i].y - 2)
   ).toBeTruthy();
+});
+
+// getPointsInLine
+test("Returns points specified", () => {
+  const pointsIn = [
+    { x: 0, y: 0 },
+    { x: 0, y: 1 },
+    { x: 0, y: 2 },
+    { x: 0, y: 3 },
+    { x: 0, y: 4 }
+  ];
+  let value = 0;
+  let axis = "y";
+  let pointsOut = [{ x: 0, y: 0 }];
+  expect(getPointsInLine(pointsIn)(axis)(value)).toEqual(pointsOut);
+});
+
+test("Returns points specified", () => {
+  const pointsIn = [
+    { x: 0, y: 0 },
+    { x: 0, y: 1 },
+    { x: 0, y: 2 },
+    { x: 0, y: 3 },
+    { x: 0, y: 4 }
+  ];
+  let value = 0;
+  let axis = "x";
+  let pointsOut = [{ x: 0, y: 0 }];
+  expect(getPointsInLine(pointsIn)(axis)(value)).toEqual(pointsIn);
+});
+
+test("Returns points specified", () => {
+  const pointsIn = [
+    { x: 0, y: 0 },
+    { x: 0, y: 1 },
+    { x: 0, y: 2 },
+    { x: 0, y: 3 },
+    { x: 0, y: 4 }
+  ];
+  let value = 10;
+  let axis = "x";
+  let pointsOut = [];
+  expect(getPointsInLine(pointsIn)(axis)(value)).toEqual(pointsOut);
 });

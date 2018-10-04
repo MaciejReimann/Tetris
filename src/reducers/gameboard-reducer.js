@@ -11,7 +11,8 @@ import { initialState } from "../logic/initialState";
 import {
   getSquareCenters,
   getTetrisVertices,
-  isColliding
+  isColliding,
+  getRows
 } from "../logic/tetrisCreation";
 import { getRandomTetris } from "../logic/tetrisDefinition";
 
@@ -87,13 +88,31 @@ export default function(state = initialState, action) {
         pixel
       ); // get vertices to pass down to the canvas
 
-      const nextSquareCenters = state.pivot
+      let nextSquareCenters = state.pivot
         ? isNotOnBottom
           ? squareCenters
           : squareCenters.concat(
               getSquareCenters(tetris)(state.pivot)(nextAngle)(pixel)
             )
         : squareCenters;
+
+      const nextGameboard = Array(board.y / pixel)
+        .fill()
+        .map((n, index) =>
+          nextSquareCenters.filter(p => (p.y - pixel / 2) / pixel === index)
+        );
+      const nextFullRows = nextGameboard.filter(
+        row => row.length >= board.x / pixel
+      );
+      const nextFullRowsIndex = nextFullRows.length
+        ? nextFullRows.map(row => (row[0].y - pixel / 2) / pixel)
+        : null;
+
+      // nextSquareCenters = nextGameboard.filter(
+      //   row => row.length < board.x / pixel
+      // );
+
+      console.log(nextFullRowsIndex);
 
       const nextSquareVertices = state.pivot
         ? nextSquareCenters.map(center =>

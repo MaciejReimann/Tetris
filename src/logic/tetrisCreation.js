@@ -1,4 +1,9 @@
-import { scalePoints, rotatePoints, movePoints } from "../helpers/pointsArrays";
+import {
+  scalePoints,
+  rotatePoints,
+  movePoints,
+  getPointsInLine
+} from "../helpers/pointsArrays";
 import { arePointsEqual } from "../helpers/pointsManipulation";
 import { getSquareVertices } from "../helpers/regularPolygon";
 
@@ -14,3 +19,6 @@ export const isColliding = squares => tetris => pivot => angle => scale =>
   getSquareCenters(tetris)(pivot)(angle)(scale).some(tetrisCenter =>
     squares.some(squareCenter => arePointsEqual(tetrisCenter)(squareCenter))
   );
+
+export const getRows = width => height => squareCenters =>
+  getPointsInLine(squareCenters)("y")(height);
