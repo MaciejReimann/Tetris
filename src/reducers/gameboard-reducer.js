@@ -5,6 +5,7 @@ import {
   multiplyPoint,
   arePointsWithinRange
 } from "../helpers/pointsManipulation";
+import { getSquareVertices } from "../helpers/regularPolygon";
 import { X, Y, DIRECTIONS } from "../logic/directionConstants";
 import { initialState } from "../logic/initialState";
 import {
@@ -60,20 +61,24 @@ export default function(state = initialState, action) {
           ? addPoints(state.pivot)(scaledMove) // move from last position
           : addPoints(startPoint)(scaledMove); // move from the start
 
-      const nextAngle = canMoveOnY(movedPivot)(turnedAngle)(isMoveDown) // if stays on gameboard after rotation
+      const isNotOnBottom = canMoveOnY(movedPivot)(turnedAngle)(isMoveDown);
+
+      const nextAngle = isNotOnBottom // if stays on gameboard after rotation
         ? canMoveOnX(movedPivot)(turnedAngle)(isMoveDown) // if stays on gameboard after rotation
           ? turnedAngle // can rotate
           : angle // else leave previous angle
         : angle; // else leave previous angle
 
-      const nextPivot = canMoveOnY(movedPivot)(nextAngle)(isMoveDown) // if doesn't collide moving down
-        ? canMoveOnX(movedPivot)(nextAngle)(isMoveDown) // and doesn't collide moving aside
+      const isNotOnSide = canMoveOnX(movedPivot)(nextAngle)(isMoveDown);
+
+      const nextPivot = isNotOnBottom // if doesn't collide moving down
+        ? isNotOnSide // and doesn't collide moving aside
           ? movedPivot // move it
           : state.pivot // else don't
         : startPoint; // if can't be dropped down, start again from the top
 
       const nextTetris = state.pivot
-        ? canMoveOnY(movedPivot)(nextAngle)(isMoveDown) // if can be dropped down
+        ? isNotOnBottom // if can be dropped down
           ? tetris
           : getRandomTetris() // if not, give another tetris
         : tetris;
@@ -83,7 +88,7 @@ export default function(state = initialState, action) {
       ); // get vertices to pass down to the canvas
 
       const nextSquareCenters = state.pivot
-        ? canMoveOnY(movedPivot)(nextAngle)(isMoveDown)
+        ? isNotOnBottom
           ? squareCenters
           : squareCenters.concat(
               getSquareCenters(tetris)(state.pivot)(nextAngle)(pixel)
@@ -91,12 +96,10 @@ export default function(state = initialState, action) {
         : squareCenters;
 
       const nextSquareVertices = state.pivot
-        ? canMoveOnY(movedPivot)(nextAngle)(isMoveDown)
-          ? squareVertices
-          : squareVertices.concat(
-              getTetrisVertices(tetris)(state.pivot)(nextAngle)(pixel)
-            )
-        : squareVertices;
+        ? nextSquareCenters.map(center =>
+            getSquareVertices(nextAngle)(center)(pixel)
+          )
+        : [];
 
       const nextCounter = counter + 1;
 
