@@ -2,7 +2,10 @@ import {
   scalePoints,
   rotatePoints,
   movePoints,
-  getPointsInLine
+  getPointsInLine,
+  sortPoints,
+  findHeightOfMatrix,
+  sortPointsinMatrix
 } from "../../helpers/pointsArrays";
 import { getRandomTetris } from "../../logic/tetrisDefinition";
 
@@ -121,3 +124,146 @@ test("Returns points specified", () => {
   let pointsOut = [];
   expect(getPointsInLine(pointsIn)(axis)(value)).toEqual(pointsOut);
 });
+
+//sortPoints
+test("Returns truthy", () => {
+  const pointsIn = [
+    { x: 0, y: 4 },
+    { x: 0, y: 2 },
+    { x: 0, y: 0 },
+    { x: 0, y: 1 },
+    { x: 0, y: 3 }
+  ];
+  const pointsOut = [
+    { x: 0, y: 0 },
+    { x: 0, y: 1 },
+    { x: 0, y: 2 },
+    { x: 0, y: 3 },
+    { x: 0, y: 4 }
+  ];
+  expect(sortPoints(pointsIn)).toEqual(pointsOut);
+});
+
+//sortPoints
+test("Puts { x: 2, y: 3 } before { x: 0, y: 4 }", () => {
+  const pointsIn = [
+    { x: 2, y: 3 },
+    { x: 1, y: 4 },
+    { x: 0, y: 4 },
+    { x: 0, y: 2 },
+    { x: 0, y: 0 },
+    { x: 2, y: 4 },
+    { x: 0, y: 1 },
+    { x: 0, y: 3 }
+  ];
+  const pointsOut = [
+    { x: 0, y: 0 },
+    { x: 0, y: 1 },
+    { x: 0, y: 2 },
+    { x: 0, y: 3 },
+    { x: 2, y: 3 },
+    { x: 0, y: 4 },
+    { x: 1, y: 4 },
+    { x: 2, y: 4 }
+  ];
+  expect(sortPoints(pointsIn)).toEqual(pointsOut);
+});
+
+// findHeightOfMatrix
+test("Returns 1", () => {
+  const pointsIn = [{ x: 2, y: 3 }];
+  expect(findHeightOfMatrix(pointsIn)(1)).toBe(1);
+});
+
+test("Returns 3", () => {
+  const pointsIn = [
+    { x: 2, y: 3 },
+    { x: 1, y: 4 },
+    { x: 0, y: 4 },
+    { x: 0, y: 2 }
+  ];
+  expect(findHeightOfMatrix(pointsIn)(1)).toBe(3);
+});
+
+test("Returns 2", () => {
+  const pointsIn = [
+    { x: 2, y: 3 },
+    { x: 1, y: 4 },
+    { x: 0, y: 4 },
+    { x: 0, y: 2 }
+  ];
+  expect(findHeightOfMatrix(pointsIn)(2)).toBe(2);
+});
+
+test("Returns 2", () => {
+  const pointsIn = [
+    { x: 2, y: 3 },
+    { x: 1, y: 4 },
+    { x: 0, y: 4 },
+    { x: 0, y: 2 }
+  ];
+  expect(findHeightOfMatrix(pointsIn)(0.5)).toBe(4);
+});
+
+test("Returns 3", () => {
+  const pointsIn = [
+    { x: 2, y: 3 },
+    { x: 1, y: 4 },
+    { x: 0, y: 4 },
+    { x: 0, y: 2 }
+  ];
+  expect(findHeightOfMatrix(pointsIn)(1)).toBe(3);
+});
+
+test("Returns 2", () => {
+  const pointsIn = [
+    { x: 2, y: 4 },
+    { x: 1, y: 4 },
+    { x: 0, y: 4 },
+    { x: 0, y: 4 }
+  ];
+  expect(findHeightOfMatrix(pointsIn)(1)).toBe(1);
+});
+
+test("Returns 4", () => {
+  const pointsIn = [
+    { x: 2, y: 1 },
+    { x: 1, y: 4 },
+    { x: 0, y: 4 },
+    { x: 0, y: 4 }
+  ];
+  expect(findHeightOfMatrix(pointsIn)(1)).toBe(4);
+});
+test("Returns 10", () => {
+  const pointsIn = [{ x: 2, y: 1 }, { x: 1, y: 10 }];
+  expect(findHeightOfMatrix(pointsIn)(1)).toBe(10);
+});
+
+// sortPointsinMatrix
+test("Truthy", () => {
+  const pointsIn = [
+    { x: 2, y: 3 },
+    { x: 1, y: 4 },
+    { x: 0, y: 4 },
+    { x: 0, y: 2 }
+  ];
+  const pointsOut = [
+    [{ x: 0, y: 2 }],
+    [{ x: 2, y: 3 }],
+    [{ x: 0, y: 4 }, { x: 1, y: 4 }]
+  ];
+  expect(sortPointsinMatrix(pointsIn)(0.5)).toEqual(pointsOut);
+});
+
+// test("Truthy", () => {
+//   const pointsIn = [
+//     { x: 2, y: 4 },
+//     { x: 1, y: 4 }
+//   ];
+//   const pointsOut = [
+//     [],
+//     [{ x: 2, y: 3 }],
+//     [{ x: 0, y: 4 }, { x: 1, y: 4 }, { x: 0, y: 2 }]
+//   ];
+//   expect(sortPointsinMatrix(pointsIn)(1)).toEqual([pointsIn]);
+// });

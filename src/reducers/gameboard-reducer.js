@@ -101,18 +101,26 @@ export default function(state = initialState, action) {
         .map((n, index) =>
           nextSquareCenters.filter(p => (p.y - pixel / 2) / pixel === index)
         );
+
       const nextFullRows = nextGameboard.filter(
         row => row.length >= board.x / pixel
       );
+
       const nextFullRowsIndex = nextFullRows.length
-        ? nextFullRows.map(row => (row[0].y - pixel / 2) / pixel)
+        ? nextFullRows
+            .map(row => (row[0].y - pixel / 2) / pixel)
+            .map(index => nextGameboard.slice(index, nextGameboard.length))
         : null;
 
-      // nextSquareCenters = nextGameboard.filter(
-      //   row => row.length < board.x / pixel
-      // );
+      nextSquareCenters = nextFullRowsIndex
+        ? nextFullRowsIndex
+            .map(i =>
+              nextSquareCenters.filter(p => (p.y - pixel / 2) / pixel !== i)
+            )
+            .flat()
+        : nextSquareCenters;
 
-      console.log(nextFullRowsIndex);
+      console.log(nextSquareCenters);
 
       const nextSquareVertices = state.pivot
         ? nextSquareCenters.map(center =>
